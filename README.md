@@ -36,7 +36,7 @@ Sources: [NWS alerts and forecast API](https://www.weather.gov/documentation/ser
 
 *Actions* → *On request* → *Run workflow* posts either a conditions update (`update`) or the guide to reading the alerts (`help`) within about half a minute.
 
-Triggering these by typing a command in the Chat space needs a small Google Chat app, because the webhook this monitor posts through is one-way: it cannot see what people type. That app is not built yet.
+To let people type `/update` and `/help` in the Chat space instead, set up the small Google Chat app in [`chat-app/`](chat-app/README.md). It is needed because the webhook this monitor posts through is one-way: it cannot see what people type.
 
 ## Changing what gets posted
 

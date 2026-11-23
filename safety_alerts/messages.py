@@ -147,17 +147,17 @@ def road_conditions_change(now: dict[str, str], before: dict[str, str], county: 
 def _road_lines(roads: dict | None, cfg: dict, now: datetime) -> list[str]:
     """`roads` is {"events": [...], "conditions": {...}}, or None when unavailable."""
     if roads is None:
-        return ["*NCDOT roads:* unavailable"]
+        return ["🚗 *NCDOT roads:* unavailable"]
     conditions = roads["conditions"]
     summary = " · ".join(f"{label}: {value}" for label, value in conditions.items()) or "no report"
-    lines = [f"*NCDOT road conditions:* {summary}"]
+    lines = [f"🚗 *NCDOT road conditions:* {summary}"]
     events = [e for e in roads["events"] if e.is_closure or e.severity in cfg["ncdot"]["incident_severities"]]
     if not events:
-        return lines + ["*NCDOT closures and major incidents:* none"]
+        return lines + ["🚧 *NCDOT closures and major incidents:* none"]
     cutoff = now.timestamp() - cfg["ncdot"]["list_days"] * 86400
     recent = sorted((e for e in events if e.reported >= cutoff), key=lambda e: -e.reported)
     older = len(events) - len(recent)
-    lines.append(f"*NCDOT closures and major incidents:* {len(events)}")
+    lines.append(f"🚧 *NCDOT closures and major incidents:* {len(events)}")
     for event in recent[:6]:
         lines.append(f"• {event.where}: {truncate(event.description, 140)}")
     hidden = older + max(0, len(recent) - 6)
@@ -166,10 +166,18 @@ def _road_lines(roads: dict | None, cfg: dict, now: datetime) -> list[str]:
     return lines
 
 
+_ALERTS_DOWN = "🔔 *Active alerts:* unavailable (NWS feed error)"
+
+
+def _sections(parts: list[list[str]]) -> str:
+    """Join groups of lines with a blank line between groups."""
+    return "\n\n".join("\n".join(lines) for lines in parts if lines)
+
+
 def _alert_lines(active: list[tuple[Alert, Rating]], now: datetime, tz) -> list[str]:
     if not active:
-        return ["*Active alerts:* none"]
-    lines = ["*Active alerts:*"]
+        return ["🔔 *Active alerts:* none"]
+    lines = ["🔔 *Active alerts:*"]
     for alert, rating in sorted(active, key=lambda pair: pair[1].tier or 9):
         icon = {1: "🚨", 2: "⚠️"}.get(rating.tier, "•")
         timing = _timing(alert, now, tz).rstrip(".")
@@ -179,7 +187,7 @@ def _alert_lines(active: list[tuple[Alert, Rating]], now: datetime, tz) -> list[
 
 def _parkway_lines(sections: list[Section] | None, as_of: str, cfg: dict) -> list[str]:
     park = cfg["parkway"]
-    label = f"*Blue Ridge Parkway (MP {park['milepost_min']:g}–{park['milepost_max']:g}):*"
+    label = f"🏞️ *Blue Ridge Parkway (MP {park['milepost_min']:g}–{park['milepost_max']:g}):*"
     if sections is None:
         return [f"{label} status unavailable"]
     closed = [s for s in sections if s.state == "closed"]
@@ -197,8 +205,8 @@ def _parkway_lines(sections: list[Section] | None, as_of: str, cfg: dict) -> lis
 
 def _forecast_lines(outlook: Outlook | None, show_hours: list[int], tz) -> list[str]:
     if outlook is None:
-        return ["*Campus forecast:* unavailable"]
-    lines, shown = ["*Campus forecast:*"], set()
+        return ["🌡️ *Campus forecast:* unavailable"]
+    lines, shown = ["🌡️ *Campus forecast*"], set()
     for hour in outlook.hours:
         local = hour.start.astimezone(tz)
         if local.hour in show_hours and local.hour not in shown:
@@ -210,7 +218,7 @@ def _forecast_lines(outlook: Outlook | None, show_hours: list[int], tz) -> list[
     gust = f"{outlook.gust_mph:.0f} mph" if outlook.gust_mph is not None else "—"
     last = outlook.hours[-1].start.astimezone(tz)
     lines.append(
-        f"*Through {fmt_clock(last)} {last:%a}:* low {low} · snow {outlook.snow_in:.1f} in · "
+        f"📊 *Through {fmt_clock(last)} {last:%a}:* low {low} · snow {outlook.snow_in:.1f} in · "
         f"ice {outlook.ice_in:.2f} in · peak gust {gust}"
     )
     if outlook.wintry_hours:
@@ -237,27 +245,31 @@ def brief(
         title, hours = f"🌅 *Morning safety brief — {local:%A, %b} {local.day}*", [6, 8, 10, 12, 15, 18]
     else:
         title, hours = f"🌙 *Evening outlook for tomorrow morning — {local:%A, %b} {local.day}*", [21, 0, 4, 6, 8, 10]
-    lines = [title, f"_{cfg['site']['name']}, {cfg['site']['county']}_"]
-    lines += ["*Active alerts:* unavailable (NWS feed error)"] if active is None else _alert_lines(active, now, tz)
-    lines += _forecast_lines(outlook, hours, tz)
+    parts = [
+        [title, f"_{cfg['site']['name']}, {cfg['site']['county']}_"],
+        [_ALERTS_DOWN] if active is None else _alert_lines(active, now, tz),
+        _forecast_lines(outlook, hours, tz),
+    ]
     if roads is not False:  # False = NCDOT source not in use
-        lines += _road_lines(roads, cfg, now)
+        parts.append(_road_lines(roads, cfg, now))
     if cfg["parkway"].get("enabled"):
-        lines += _parkway_lines(sections, as_of, cfg)
-    lines.append(f"<{forecast_link(cfg)}|Full NWS forecast for campus>")
-    return "\n".join(lines)
+        parts.append(_parkway_lines(sections, as_of, cfg))
+    parts.append([f"🔗 <{forecast_link(cfg)}|Full NWS forecast for campus>"])
+    return _sections(parts)
 
 
 def startup(cfg: dict, now: datetime, tz, active: list[tuple[Alert, Rating]] | None, sections, as_of: str) -> str:
-    lines = [
-        f"✅ *Safety alert monitor is online* for {cfg['site']['name']}, {cfg['site']['county']}.",
-        "🚨 act-now alerts ping this space · ⚠️ heads-up alerts post quietly · "
-        "updates and end-of-alert notices reply in the same thread.",
+    parts = [
+        [
+            f"✅ *Safety alert monitor is online* for {cfg['site']['name']}, {cfg['site']['county']}.",
+            "🚨 act-now alerts ping this space · ⚠️ heads-up alerts post quietly · "
+            "updates and end-of-alert notices reply in the same thread.",
+        ],
+        [_ALERTS_DOWN] if active is None else _alert_lines(active, now, tz),
     ]
-    lines += ["*Active alerts:* unavailable (NWS feed error)"] if active is None else _alert_lines(active, now, tz)
     if cfg["parkway"].get("enabled"):
-        lines += _parkway_lines(sections, as_of, cfg)
-    return "\n".join(lines)
+        parts.append(_parkway_lines(sections, as_of, cfg))
+    return _sections(parts)
 
 
 def guide(cfg: dict) -> str:
@@ -283,6 +295,10 @@ def guide(cfg: dict) -> str:
         "an alert is active or winter weather is in the forecast. No message means nothing to flag.",
         "📋 *Conditions update* — current alerts, campus forecast and roads, posted when someone asks for it.",
         "🛠️ *Monitor notice* — one of the data sources is unreachable; check it directly until it clears.",
+    ]
+    if cfg["chat"].get("commands"):
+        lines.append("⌨️ *Commands* — type `/update` for current conditions or `/help` for this guide.")
+    lines += [
         "_This supplements phone emergency alerts and a NOAA weather radio; it does not replace them. "
         "Alerts here can lag the official warning by several minutes._",
     ]

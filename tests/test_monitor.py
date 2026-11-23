@@ -544,6 +544,10 @@ class Guide(unittest.TestCase):
         for icon in ("🚨", "⚠️", "🔄", "✅", "🚧", "🧊", "🌅", "📋", "🛠️"):
             self.assertIn(icon, text)
         self.assertIn("summaries at 5 AM and 7 PM", text)
+        self.assertNotIn("/update", text)
+        with_commands = copy.deepcopy(CONFIG)
+        with_commands["chat"]["commands"] = True
+        self.assertIn("type `/update` for current conditions", messages.guide(with_commands))
         self.assertLess(len(text), 3900)
 
 
