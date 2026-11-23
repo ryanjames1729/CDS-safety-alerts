@@ -7,7 +7,7 @@ import re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from . import forecast, messages, nws, parkway
+from . import forecast, messages, ncdot, nws, parkway
 from .chat import Chat
 from .nws import Alert, Rating
 from .util import SourceError, now_utc, parse_time
@@ -28,8 +28,11 @@ def _gist(alert: Alert) -> str:
 
 
 class Monitor:
-    def __init__(self, cfg: dict, state: dict, chat: Chat, clock=now_utc) -> None:
+    def __init__(self, cfg: dict, state: dict, chat: Chat, clock=now_utc, ncdot_key: str = "") -> None:
         self.cfg, self.state, self.chat, self.clock = cfg, state, chat, clock
+        self.ncdot_key = ncdot_key if cfg.get("ncdot", {}).get("enabled") else ""
+        # False = NCDOT not in use, None = unreachable, else {"events", "conditions"}
+        self.roads: dict | None | bool = False
         self.tz = ZoneInfo(cfg["site"]["timezone"])
         self.active: list[tuple[Alert, Rating]] | None = None  # None = NWS unreachable
         self.sections: list[parkway.Section] | None = None
@@ -190,6 +193,46 @@ class Monitor:
             "sections": {s.key: {"state": s.state, "status": s.status} for s in sections},
         }
 
+    # --- NCDOT roads --------------------------------------------------------
+
+    def poll_roads(self, quiet: bool = False) -> None:
+        if not self.ncdot_key:
+            return
+        try:
+            events, conditions = ncdot.fetch(self.cfg, self.ncdot_key)
+        except SourceError as exc:
+            self.roads = None
+            self._health("ncdot", "NCDOT DriveNC", exc)
+            return
+        self._health("ncdot", "NCDOT DriveNC", None)
+        self.process_roads(events, conditions, quiet)
+
+    def process_roads(self, events: list[ncdot.RoadEvent], conditions: dict[str, str], quiet: bool = False) -> None:
+        self.roads = {"events": events, "conditions": conditions}
+        saved = self.state.get("ncdot")
+        quiet = quiet or saved is None  # first sight of this source: note what exists, post nothing
+        saved = self.state.setdefault("ncdot", {"events": {}, "conditions": {}})
+        known: dict = saved["events"]
+
+        notable = {e.id: e for e in events if ncdot.is_notable(e, self.cfg)}
+        for event_id, event in notable.items():
+            if event_id in known:
+                continue
+            if not quiet and not self._post(messages.road_event(event), f"ncdot-{event_id}"):
+                continue
+            known[event_id] = {"where": event.where, "summary": event.description[:200]}
+        for event_id in [i for i in known if i not in notable]:
+            gone = known[event_id]
+            text = messages.road_event_cleared(gone["where"], gone["summary"])
+            if quiet or self._post(text, f"ncdot-{event_id}"):
+                del known[event_id]
+
+        if conditions != saved["conditions"]:
+            day = self.clock().astimezone(self.tz).date().isoformat()
+            text = messages.road_conditions_change(conditions, saved["conditions"], self.cfg["site"]["county"])
+            if quiet or self._post(text, f"ncdot-conditions-{day}"):
+                saved["conditions"] = conditions
+
     # --- briefs -------------------------------------------------------------
 
     def due_briefs(self) -> list[str]:
@@ -225,7 +268,9 @@ class Monitor:
                 print("Evening outlook: nothing to flag, not sent.", flush=True)
                 return
 
-        text = messages.brief(kind, self.cfg, now, self.tz, self.active, outlook, self.sections, self.as_of)
+        text = messages.brief(
+            kind, self.cfg, now, self.tz, self.active, outlook, self.sections, self.as_of, self.roads
+        )
         if self._post(text, f"brief-{kind}-{today}"):
             self.state.setdefault("briefs", {})[kind] = today
 
@@ -236,6 +281,7 @@ class Monitor:
         if not self.state.get("started"):
             self.poll_alerts(quiet=True)
             self.poll_parkway(quiet=True)
+            self.poll_roads(quiet=True)
             text = messages.startup(self.cfg, self.clock(), self.tz, self.active, self.sections, self.as_of)
             if self._post(text, "monitor-start"):
                 self.state["started"] = True
@@ -243,5 +289,6 @@ class Monitor:
         self.poll_alerts()
         if full:
             self.poll_parkway()
+            self.poll_roads()
             for kind in self.due_briefs():
                 self.send_brief(kind)

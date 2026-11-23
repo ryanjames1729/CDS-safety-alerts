@@ -11,37 +11,36 @@ Posts weather and road-status alerts for Buncombe County to a Google Chat space,
 | 🔄 **Updates** | An alert is extended, revised, or its storm polygon moves | Reply in the same thread |
 | ✅ **Ended** | An alert is cancelled or expires | Reply in the same thread |
 | 🚧 **Parkway** | A Blue Ridge Parkway section in Buncombe County opens or closes | New message, no ping |
-| 🌅 **Morning brief** | 5:00 AM on school days, always | Active alerts, campus forecast through the day, snow and ice totals, Parkway closures |
+| 🚧 **Road closure** | NCDOT reports a full closure or major incident in Buncombe County; a reply follows when it clears | New message, no ping |
+| 🧊 **Road conditions** | NCDOT's Snow & Ice report for Buncombe County changes (interstates, US/NC routes, secondary roads) | New message, no ping |
+| 🌅 **Morning brief** | 5:00 AM on school days, always | Active alerts, campus forecast through the day, snow and ice totals, NCDOT road conditions and closures, Parkway closures |
 | 🌙 **Evening outlook** | 7:00 PM Sunday to Thursday, only if there is an alert, snow or ice, or freezing precipitation in the forecast | Same content, looking at the next morning |
 | 🛠️ **Monitor notice** | A data source has been unreachable for 15 minutes, and when it recovers | New message |
 
 Tornado, severe thunderstorm and flash flood warnings are drawn as a polygon around the storm. The message says whether campus is inside it, and warnings that miss campus do not ping (a tornado warning anywhere in the county always does).
 
-Sources: [NWS alerts and forecast API](https://www.weather.gov/documentation/services-web-api) and the [NPS Blue Ridge Parkway road closures page](https://www.nps.gov/blri/planyourvisit/roadclosures.htm). NCDOT road conditions are not connected yet; see [Not yet included](#not-yet-included).
+Sources: [NWS alerts and forecast API](https://www.weather.gov/documentation/services-web-api), the [NPS Blue Ridge Parkway road closures page](https://www.nps.gov/blri/planyourvisit/roadclosures.htm), and the [NCDOT DriveNC API](https://www.drivenc.gov/developers/doc).
 
 ## Setup
 
 1. **Create the Chat space.** In Google Chat, create a space and add the people who should receive alerts. Open the space menu → *Apps & integrations* → *Webhooks* → *Add webhook*, name it "Safety Alerts", and copy the URL.
 2. **Store the URL as a secret.** In this repository: *Settings* → *Secrets and variables* → *Actions* → *New repository secret*. Name it `GOOGLE_CHAT_WEBHOOK_URL` and paste the URL. Treat the URL like a password: anyone who has it can post to the space.
-3. **Confirm the campus location** in [`config.toml`](config.toml) (`latitude` and `longitude`).
-4. **Put this code on the default branch (`main`).** GitHub only runs scheduled workflows from the default branch.
-5. **Send a test.** *Actions* → *Safety alerts* → *Run workflow* → choose `test-message`. A test message should appear in the space. The next scheduled run posts a one-time "monitor is online" summary.
+3. **Store the NCDOT key.** Request a free developer key at <https://www.drivenc.gov/developers/doc> and add it as a second repository secret named `NCDOT_API_KEY`. Without it, NCDOT road data is skipped and everything else still runs.
+4. **Confirm the campus location** in [`config.toml`](config.toml) (`latitude` and `longitude`).
+5. **Make `main` the default branch** (*Settings* → *General* → *Default branch*). GitHub only runs scheduled workflows from the default branch.
+6. **Send a test.** *Actions* → *Safety alerts* → *Run workflow* → choose `test-message`. A test message should appear in the space. The next scheduled run posts a one-time "monitor is online" summary.
 
 The same *Run workflow* menu can send a morning or evening brief on demand.
 
 ## Changing what gets posted
 
-Everything adjustable is in [`config.toml`](config.toml): which alert types are act-now or heads-up, who gets pinged, brief times and days, and the Parkway milepost range. Edit the file on GitHub and commit; the next run uses it.
+Everything adjustable is in [`config.toml`](config.toml): which alert types are act-now or heads-up, who gets pinged, brief times and days, which NCDOT incidents are worth a message, and the Parkway milepost range. Edit the file on GitHub and commit; the next run uses it.
 
 ## Limits to know about
 
-- **This supplements, and does not replace, phone emergency alerts and a NOAA weather radio.** GitHub usually starts scheduled runs within a few minutes, but can be 10 to 20 minutes late at busy times, and can skip runs entirely. Once a run starts it checks NWS every minute for about four minutes.
+- **This supplements, and does not replace, phone emergency alerts and a NOAA weather radio.** GitHub usually starts scheduled runs within a few minutes, but can be 10 to 20 minutes late at busy times, and can skip runs entirely. Once a run starts it checks NWS every minute for four minutes; NCDOT and the Parkway are checked once per run.
 - **Missing morning brief means something is wrong.** It is sent every school day even when nothing is happening, so its absence is the signal to look at the *Actions* tab. GitHub also emails the repository owner when a run fails, and disables schedules in repositories with no activity for 60 days.
 - The repository is public, so run logs and `config.toml` are visible to anyone. The webhook URL is not; it lives only in the repository secret.
-
-## Not yet included
-
-**NCDOT road conditions and closures.** NCDOT retired its open traffic feed in May 2026. The replacement DriveNC API needs a free developer key from <https://www.drivenc.gov/developers/doc>. Once a key is available it can be added as a second secret and wired in alongside the other sources.
 
 ## How it works
 
@@ -52,6 +51,7 @@ safety_alerts/
   nws.py        NWS alerts: fetch, tiering, campus-in-polygon check
   forecast.py   campus hourly forecast, snow / ice / gust totals
   parkway.py    Blue Ridge Parkway road status
+  ncdot.py      NCDOT closures, incidents and Snow & Ice road conditions
   engine.py     what is new, updated or over; briefs; source health
   messages.py   wording of every message
   chat.py       Google Chat webhook

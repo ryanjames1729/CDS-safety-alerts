@@ -99,6 +99,17 @@ url = "https://www.nps.gov/blri/planyourvisit/roadclosures.htm"
 milepost_min = 355.0
 milepost_max = 406.0
 
+[ncdot]
+# NCDOT DriveNC road closures, incidents and Snow & Ice road conditions.
+# Needs the NCDOT_API_KEY repository secret; without it this source is skipped.
+enabled = true
+county = "Buncombe"
+# Full closures always get their own message. Other crashes and incidents only
+# do at these severities; everything else is left out.
+incident_severities = ["Major"]
+# In the briefs, closures older than this are counted but not listed one by one.
+list_days = 7
+
 [briefs]
 # Morning brief: sent on these days whether or not anything is happening, so
 # its arrival also confirms the monitor is running. 0 = Monday ... 6 = Sunday.

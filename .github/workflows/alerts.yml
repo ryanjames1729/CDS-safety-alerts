@@ -4,7 +4,7 @@ on:
   schedule:
     # Every 5 minutes, offset from the top of the hour when GitHub is busiest
     # and starts scheduled runs latest. Each run then keeps polling NWS once a
-    # minute for about 4 minutes, so warnings are picked up quickly.
+    # minute for 4 minutes, so warnings are picked up quickly.
     - cron: "2-59/5 * * * *"
   workflow_dispatch:
     inputs:
@@ -31,6 +31,7 @@ jobs:
     timeout-minutes: 10
     env:
       GOOGLE_CHAT_WEBHOOK_URL: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+      NCDOT_API_KEY: ${{ secrets.NCDOT_API_KEY }}
       STATE_BRANCH: alert-state
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +58,7 @@ jobs:
             test-message)  python3 -m safety_alerts --test-message ;;
             morning-brief) python3 -m safety_alerts --state .state/state.json --brief morning ;;
             evening-brief) python3 -m safety_alerts --state .state/state.json --brief evening ;;
-            *)             python3 -m safety_alerts --state .state/state.json --loop-seconds 240 --interval 60 ;;
+            *)             python3 -m safety_alerts --state .state/state.json --loop-seconds 250 --interval 60 ;;
           esac
 
       - name: Save state

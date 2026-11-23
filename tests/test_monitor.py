@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from safety_alerts import forecast, messages, nws, parkway
+from safety_alerts import forecast, messages, ncdot, nws, parkway
 from safety_alerts.chat import Chat
 from safety_alerts.engine import Monitor
 from safety_alerts.util import SourceError, locate, parse_interval
@@ -322,6 +322,110 @@ class Parkway(unittest.TestCase):
         self.assertIn("*Closed* (was: Open) — Weather Closure", chat.sent[0][1])
         mon.process_parkway(self.sections, self.as_of)
         self.assertIn("*Open* (was: Closed)", chat.sent[1][1])
+
+
+def road_item(event_id: int, county: str = "Buncombe", **changes) -> dict:
+    """An event shaped like the samples in NCDOT's API documentation."""
+    item = {
+        "ID": event_id,
+        "RoadwayName": "I-26",
+        "DirectionOfTravel": "Eastbound",
+        "Description": "Vehicle Crash on I-26 Eastbound near Exit 37. All lanes closed.",
+        "Reported": int(NOW.timestamp()) - 600,
+        "StartDate": int(NOW.timestamp()) - 600,
+        "LanesAffected": "All lanes closed",
+        "EventType": "closures",
+        "EventSubType": "vehicleCrash",
+        "IsFullClosure": True,
+        "Severity": "Major",
+        "Comment": "detour is available. ",
+        "County": county,
+        "OriginalEventType": "accidentsAndIncidents",
+    }
+    return {**item, **changes}
+
+
+def condition_item(county: str = "Buncombe", **changes) -> dict:
+    item = {
+        "Id": 27,
+        "LocationDescription": county,
+        "Overall for Public Display": "No Report",
+        "Interstates": None,
+        "US/NC Routes": None,
+        "Secondary Roads": None,
+        "AreaName": county,
+        "LastUpdated": 1742322224,
+        "County": county,
+    }
+    return {**item, **changes}
+
+
+MINOR_CRASH = dict(EventType="accidentsAndIncidents", IsFullClosure=False, Severity="Minor", LanesAffected="1 Right lane closed")
+
+
+class Roads(unittest.TestCase):
+    def test_only_the_county_is_kept(self):
+        events = ncdot.parse_events([road_item(1), road_item(2, county="Moore")], "Buncombe")
+        self.assertEqual([e.id for e in events], ["1"])
+        self.assertEqual(events[0].where, "I-26 Eastbound")
+        self.assertTrue(events[0].is_closure)
+
+    def test_no_report_means_no_conditions(self):
+        rows = [condition_item(), condition_item("Bertie")]
+        self.assertEqual(ncdot.parse_conditions(rows, "Buncombe"), {})
+        rows[0].update({"Interstates": "Clear", "Secondary Roads": "Snow/Ice Covered"})
+        self.assertEqual(
+            ncdot.parse_conditions(rows, "Buncombe"), {"Interstates": "Clear", "Secondary roads": "Snow/Ice Covered"}
+        )
+
+    def test_unexpected_responses_are_errors_not_all_clear(self):
+        with self.assertRaises(SourceError):
+            ncdot.parse_events([{"unexpected": 1}], "Buncombe")
+        with self.assertRaises(SourceError):
+            ncdot.parse_conditions([condition_item("Bertie")], "Buncombe")
+
+    def test_existing_closures_are_noted_quietly_then_new_ones_post(self):
+        mon, chat, _ = monitor()
+        parse = lambda *items: ncdot.parse_events(list(items), "Buncombe")
+        mon.process_roads(parse(road_item(1)), {})
+        self.assertEqual(chat.sent, [], "closures already there when NCDOT is first connected")
+
+        mon.process_roads(parse(road_item(1), road_item(2, RoadwayName="US-25"), road_item(3, **MINOR_CRASH)), {})
+        self.assertEqual(len(chat.sent), 1, "minor crash is left out")
+        thread, text = chat.sent[0]
+        self.assertIn("🚧 *Road closure — US-25 Eastbound* (NCDOT)", text)
+        self.assertIn("Lanes: All lanes closed · Severity: Major", text)
+
+        mon.process_roads(parse(road_item(1)), {})
+        self.assertEqual(chat.sent[1][0], thread)
+        self.assertIn("Cleared or reopened:* US-25 Eastbound", chat.sent[1][1])
+        self.assertEqual(list(mon.state["ncdot"]["events"]), ["1"])
+
+    def test_condition_changes_post_once(self):
+        mon, chat, _ = monitor()
+        mon.process_roads([], {})
+        icy = {"Overall": "Snow/Ice Covered", "Secondary roads": "Snow/Ice Covered"}
+        mon.process_roads([], icy)
+        mon.process_roads([], icy)
+        self.assertEqual(len(chat.sent), 1)
+        self.assertIn("• Overall: *Snow/Ice Covered* (was: No report)", chat.sent[0][1])
+        mon.process_roads([], {})
+        self.assertIn("• Overall: *No report* (was: Snow/Ice Covered)", chat.sent[1][1])
+
+    def test_brief_lists_recent_closures_and_counts_old_ones(self):
+        old = int(NOW.timestamp()) - 40 * 86400
+        events = ncdot.parse_events(
+            [road_item(1), road_item(2, RoadwayName="SR-1103", Reported=old), road_item(3, **MINOR_CRASH)], "Buncombe"
+        )
+        roads = {"events": events, "conditions": {"Overall": "Clear"}}
+        text = messages.brief("morning", CONFIG, NOW, ZoneInfo("America/New_York"), [], None, None, "", roads)
+        self.assertIn("*NCDOT road conditions:* Overall: Clear", text)
+        self.assertIn("*NCDOT closures and major incidents:* 2", text)
+        self.assertIn("• I-26 Eastbound: Vehicle Crash", text)
+        self.assertIn("• plus 1 more, mostly long-standing", text)
+        self.assertNotIn("SR-1103", text)
+        without = messages.brief("morning", CONFIG, NOW, ZoneInfo("America/New_York"), [], None, None, "")
+        self.assertNotIn("NCDOT", without)
 
 
 class Forecast(unittest.TestCase):

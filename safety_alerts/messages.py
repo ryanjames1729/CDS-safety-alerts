@@ -6,6 +6,7 @@ import re
 from datetime import datetime
 
 from .forecast import Outlook, describe_spans
+from .ncdot import MAP_URL, RoadEvent
 from .nws import Alert, Rating
 from .parkway import Section
 from .util import fmt_clock, fmt_when, truncate, unwrap
@@ -116,6 +117,55 @@ def parkway_change(changes: list[tuple[Section, str]], as_of: str) -> str:
     return "\n".join(lines)
 
 
+def road_event(event: RoadEvent) -> str:
+    title = "Road closure" if event.is_closure else "Road incident"
+    lines = [f"🚧 *{title} — {event.where}* (NCDOT)", truncate(event.description, 500)]
+    facts = [f"Lanes: {event.lanes}"] if event.lanes else []
+    if event.severity.lower() != "unknown":
+        facts.append(f"Severity: {event.severity}")
+    if facts:
+        lines.append("• " + " · ".join(facts))
+    if event.comment:
+        lines.append(f"• {truncate(event.comment, 300)}")
+    lines.append(f"<{MAP_URL}|DriveNC map>")
+    return "\n".join(lines)
+
+
+def road_event_cleared(where: str, summary: str) -> str:
+    return f"✅ *Cleared or reopened:* {where} — NCDOT no longer lists this as a closure or major incident.\n_{summary}_"
+
+
+def road_conditions_change(now: dict[str, str], before: dict[str, str], county: str) -> str:
+    lines = [f"🧊 *NCDOT road conditions changed — {county}*"]
+    for label in dict.fromkeys([*now, *before]):
+        new, old = now.get(label, "No report"), before.get(label, "No report")
+        lines.append(f"• {label}: *{new}*" + (f" (was: {old})" if new != old else ""))
+    lines.append(f"<{MAP_URL}|DriveNC map>")
+    return "\n".join(lines)
+
+
+def _road_lines(roads: dict | None, cfg: dict, now: datetime) -> list[str]:
+    """`roads` is {"events": [...], "conditions": {...}}, or None when unavailable."""
+    if roads is None:
+        return ["*NCDOT roads:* unavailable"]
+    conditions = roads["conditions"]
+    summary = " · ".join(f"{label}: {value}" for label, value in conditions.items()) or "no report"
+    lines = [f"*NCDOT road conditions:* {summary}"]
+    events = [e for e in roads["events"] if e.is_closure or e.severity in cfg["ncdot"]["incident_severities"]]
+    if not events:
+        return lines + ["*NCDOT closures and major incidents:* none"]
+    cutoff = now.timestamp() - cfg["ncdot"]["list_days"] * 86400
+    recent = sorted((e for e in events if e.reported >= cutoff), key=lambda e: -e.reported)
+    older = len(events) - len(recent)
+    lines.append(f"*NCDOT closures and major incidents:* {len(events)}")
+    for event in recent[:6]:
+        lines.append(f"• {event.where}: {truncate(event.description, 140)}")
+    hidden = older + max(0, len(recent) - 6)
+    if hidden:
+        lines.append(f"• plus {hidden} more, mostly long-standing (<{MAP_URL}|DriveNC map>)")
+    return lines
+
+
 def _alert_lines(active: list[tuple[Alert, Rating]], now: datetime, tz) -> list[str]:
     if not active:
         return ["*Active alerts:* none"]
@@ -177,6 +227,7 @@ def brief(
     outlook: Outlook | None,
     sections: list[Section] | None,
     as_of: str,
+    roads: dict | None | bool = False,
 ) -> str:
     local = now.astimezone(tz)
     if kind == "morning":
@@ -186,6 +237,8 @@ def brief(
     lines = [title, f"_{cfg['site']['name']}, {cfg['site']['county']}_"]
     lines += ["*Active alerts:* unavailable (NWS feed error)"] if active is None else _alert_lines(active, now, tz)
     lines += _forecast_lines(outlook, hours, tz)
+    if roads is not False:  # False = NCDOT source not in use
+        lines += _road_lines(roads, cfg, now)
     if cfg["parkway"].get("enabled"):
         lines += _parkway_lines(sections, as_of, cfg)
     lines.append(f"<{forecast_link(cfg)}|Full NWS forecast for campus>")

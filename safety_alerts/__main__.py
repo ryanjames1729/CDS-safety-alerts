@@ -64,15 +64,19 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if ok else 1
 
     state = load_state(state_path)
+    ncdot_key = os.environ.get("NCDOT_API_KEY", "").strip()
+    if cfg.get("ncdot", {}).get("enabled") and not ncdot_key:
+        print("NCDOT_API_KEY is not set: skipping NCDOT road data.", flush=True)
 
     if args.brief:
         # A brief on demand reads the sources but leaves the saved state alone.
-        monitor = Monitor(cfg, json.loads(json.dumps(state)), chat)
+        monitor = Monitor(cfg, json.loads(json.dumps(state)), chat, ncdot_key=ncdot_key)
         monitor.poll_alerts(quiet=True)
         monitor.poll_parkway(quiet=True)
+        monitor.poll_roads(quiet=True)
         monitor.send_brief(args.brief, forced=True)
     else:
-        monitor = Monitor(cfg, state, chat)
+        monitor = Monitor(cfg, state, chat, ncdot_key=ncdot_key)
         deadline = time.monotonic() + args.loop_seconds
         first = True
         while True:
@@ -86,6 +90,9 @@ def main(argv: list[str] | None = None) -> int:
     if not args.brief:
         events = state.get("events", {})
         print(f"Done. Tracking {len(events)} active alert(s); {len(chat.sent)} message(s) sent.", flush=True)
+        if isinstance(monitor.roads, dict):
+            shown = monitor.roads["conditions"] or "no report"
+            print(f"NCDOT: {len(monitor.roads['events'])} county event(s); road conditions: {shown}", flush=True)
     if monitor.post_failed:
         print("One or more Chat posts failed.", flush=True)
         return 1
