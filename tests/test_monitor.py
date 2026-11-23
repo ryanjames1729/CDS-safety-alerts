@@ -304,6 +304,25 @@ class Parkway(unittest.TestCase):
         self.assertIn("Hendersonville Road", asheville.crossroads)
         self.assertEqual(asheville.state, "open")
 
+    def test_configured_range_stops_at_the_access_roads(self):
+        park = CONFIG["parkway"]
+        html = (FIXTURES / "parkway_roadclosures.html").read_text(encoding="utf-8")
+        sections, _ = parkway.parse_page(html, park["milepost_min"], park["milepost_max"])
+        self.assertEqual(
+            [s.mileposts for s in sections],
+            [
+                "MP 375.7",
+                "MP 375.7–381.9",
+                "MP 377.4",
+                "MP 381.9–382.8",
+                "MP 382.8–384.1",
+                "MP 384.1–384.7",
+                "MP 384.7–388.8",
+                "MP 388.8–393.6",
+            ],
+        )
+        self.assertFalse([s for s in sections if s.state == "closed"], "Mitchell and Craggy closures are out of range")
+
     def test_unrecognised_page_is_an_error_not_an_all_clear(self):
         with self.assertRaises(SourceError):
             parkway.parse_page("<html><body>Page moved</body></html>", 355.0, 406.0)

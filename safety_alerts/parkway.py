@@ -83,7 +83,10 @@ def parse_page(html: str, mp_min: float, mp_max: float) -> tuple[list[Section], 
         if end < start or end > 470:
             continue
         total += 1
-        if end >= mp_min and start <= mp_max:
+        # A stretch must lie partly inside the range (merely touching an end does
+        # not count); a single access point counts if it is within the range.
+        within = mp_min <= start <= mp_max if start == end else end > mp_min and start < mp_max
+        if within:
             note = row[3] if len(row) > 3 else ""
             sections.append(Section(start, end, row[1], row[2], note))
     if total < 20:

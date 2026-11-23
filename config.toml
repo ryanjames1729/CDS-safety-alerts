@@ -94,10 +94,19 @@ ignore = []
 [parkway]
 enabled = true
 url = "https://www.nps.gov/blri/planyourvisit/roadclosures.htm"
-# Blue Ridge Parkway mileposts that fall in Buncombe County
-# (Mount Mitchell turnoff south to the NC-151 access near Mount Pisgah).
-milepost_min = 355.0
-milepost_max = 406.0
+# The stretch of Parkway that works as a through route around Asheville, from
+# one public road access to another:
+#   375.7  Ox Creek / Elk Mountain Rd (Bull Gap, toward Weaverville)
+#   377.4  Town Mountain Rd (Craven Gap)
+#   382.8  US-70 Tunnel Rd
+#   384.7  US-74A (I-40 exit 53A)
+#   388.8  US-25 Hendersonville Rd (nearest campus)
+#   393.6  NC-191 Brevard Rd
+# Sections beyond these (Craggy Gardens and Mount Mitchell to the north,
+# Mount Pisgah to the south) are left out. To extend south to the NC-151
+# access, set milepost_max = 405.5.
+milepost_min = 375.7
+milepost_max = 393.6
 
 [ncdot]
 # NCDOT DriveNC road closures, incidents and Snow & Ice road conditions.
