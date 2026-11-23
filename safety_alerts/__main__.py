@@ -104,6 +104,10 @@ def main(argv: list[str] | None = None) -> int:
         kinds = Counter(f"{e.kind}/{e.severity}{'/full closure' if e.full_closure else ''}" for e in monitor.roads["events"])
         print(f"NCDOT county events: {dict(kinds) or 'none'}", flush=True)
         print(f"NCDOT road conditions: {monitor.roads['conditions'] or 'no report'}", flush=True)
+        for e in monitor.roads["events"]:
+            if e.is_closure or e.kind == "accidentsAndIncidents":
+                since = time.strftime("%Y-%m-%d", time.gmtime(e.reported)) if e.reported else "?"
+                print(f"  {e.kind}/{e.original_kind}/{e.subtype} since {since} | {e.where} | {e.description[:150]}", flush=True)
     if monitor.post_failed:
         print("One or more Chat posts failed.", flush=True)
         return 1

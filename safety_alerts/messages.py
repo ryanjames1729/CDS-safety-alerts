@@ -121,7 +121,7 @@ def road_event(event: RoadEvent) -> str:
     title = "Road closure" if event.is_closure else "Road incident"
     lines = [f"🚧 *{title} — {event.where}* (NCDOT)", truncate(event.description, 500)]
     facts = [f"Lanes: {event.lanes}"] if event.lanes else []
-    if event.severity.lower() != "unknown":
+    if event.severity.lower() not in ("unknown", "none", ""):
         facts.append(f"Severity: {event.severity}")
     if facts:
         lines.append("• " + " · ".join(facts))
