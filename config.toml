@@ -5,10 +5,10 @@
 name = "Carolina Day School"
 county = "Buncombe County"
 # Campus location. Used to decide whether a warning polygon covers campus and
-# to pull the point forecast. CONFIRM THESE: right-click the campus in Google
-# Maps and copy the coordinates.
-latitude = 35.5357
-longitude = -82.5306
+# to pull the point forecast. To change: right-click the spot in Google Maps
+# and copy the coordinates.
+latitude = 35.523776
+longitude = -82.529897
 timezone = "America/New_York"
 
 [nws]
