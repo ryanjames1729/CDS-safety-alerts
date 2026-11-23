@@ -120,13 +120,14 @@ incident_severities = ["Major"]
 list_days = 7
 
 [briefs]
-# Morning brief: sent on these days whether or not anything is happening, so
-# its arrival also confirms the monitor is running. 0 = Monday ... 6 = Sunday.
+# Both briefs are only sent when there is something to flag: an active act-now
+# or heads-up alert, snow or ice in the forecast, or freezing temperatures with
+# precipitation. On an ordinary day nothing is posted.
+# Days: 0 = Monday ... 6 = Sunday.
+# Morning brief, in time for a closure or delay decision.
 morning_time = "05:00"
 morning_days = [0, 1, 2, 3, 4]
-# Evening outlook for the next morning: only sent when there is something to
-# flag (active alert, snow or ice in the forecast, or freezing temperatures
-# with precipitation).
+# Evening outlook for the next morning.
 evening_time = "19:00"
 evening_days = [6, 0, 1, 2, 3]
 # How late a brief may still be sent if the scheduler runs behind.

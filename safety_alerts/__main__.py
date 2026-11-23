@@ -8,8 +8,10 @@ import os
 import sys
 import time
 import tomllib
+from collections import Counter
 from pathlib import Path
 
+from . import messages
 from .chat import Chat
 from .engine import Monitor
 
@@ -40,7 +42,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--dry-run", action="store_true", help="print messages instead of posting them")
     ap.add_argument("--loop-seconds", type=int, default=0, help="keep polling NWS alerts for this long")
     ap.add_argument("--interval", type=int, default=60, help="seconds between polls when looping")
-    ap.add_argument("--brief", choices=["morning", "evening"], help="send this brief now, then exit")
+    ap.add_argument(
+        "--brief",
+        choices=["status", "morning", "evening"],
+        help="post this summary now, then exit ('status' is the on-demand conditions update)",
+    )
+    ap.add_argument("--guide", action="store_true", help="post the how-to-read-these-alerts message, then exit")
     ap.add_argument("--test-message", action="store_true", help="post a test message, then exit")
     args = ap.parse_args(argv)
 
@@ -62,6 +69,9 @@ def main(argv: list[str] | None = None) -> int:
             "monitor-test",
         )
         return 0 if ok else 1
+
+    if args.guide:
+        return 0 if chat.post(messages.guide(cfg), "monitor-guide") else 1
 
     state = load_state(state_path)
     ncdot_key = os.environ.get("NCDOT_API_KEY", "").strip()
@@ -90,9 +100,10 @@ def main(argv: list[str] | None = None) -> int:
     if not args.brief:
         events = state.get("events", {})
         print(f"Done. Tracking {len(events)} active alert(s); {len(chat.sent)} message(s) sent.", flush=True)
-        if isinstance(monitor.roads, dict):
-            shown = monitor.roads["conditions"] or "no report"
-            print(f"NCDOT: {len(monitor.roads['events'])} county event(s); road conditions: {shown}", flush=True)
+    if isinstance(monitor.roads, dict):
+        kinds = Counter(f"{e.kind}/{e.severity}{'/full closure' if e.full_closure else ''}" for e in monitor.roads["events"])
+        print(f"NCDOT county events: {dict(kinds) or 'none'}", flush=True)
+        print(f"NCDOT road conditions: {monitor.roads['conditions'] or 'no report'}", flush=True)
     if monitor.post_failed:
         print("One or more Chat posts failed.", flush=True)
         return 1

@@ -15,8 +15,6 @@ on:
         options:
           - poll
           - test-message
-          - morning-brief
-          - evening-brief
 
 permissions:
   contents: write # to save what has already been reported on the alert-state branch
@@ -55,10 +53,8 @@ jobs:
           ACTION: ${{ inputs.action || 'poll' }}
         run: |
           case "$ACTION" in
-            test-message)  python3 -m safety_alerts --test-message ;;
-            morning-brief) python3 -m safety_alerts --state .state/state.json --brief morning ;;
-            evening-brief) python3 -m safety_alerts --state .state/state.json --brief evening ;;
-            *)             python3 -m safety_alerts --state .state/state.json --loop-seconds 250 --interval 60 ;;
+            test-message) python3 -m safety_alerts --test-message ;;
+            *)            python3 -m safety_alerts --state .state/state.json --loop-seconds 250 --interval 60 ;;
           esac
 
       - name: Save state

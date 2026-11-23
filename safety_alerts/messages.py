@@ -230,7 +230,10 @@ def brief(
     roads: dict | None | bool = False,
 ) -> str:
     local = now.astimezone(tz)
-    if kind == "morning":
+    if kind == "status":
+        title = f"📋 *Conditions update — {local:%A} {fmt_clock(local)}* (requested)"
+        hours = [(local.hour + step) % 24 for step in (0, 2, 4, 7, 10, 13)]
+    elif kind == "morning":
         title, hours = f"🌅 *Morning safety brief — {local:%A, %b} {local.day}*", [6, 8, 10, 12, 15, 18]
     else:
         title, hours = f"🌙 *Evening outlook for tomorrow morning — {local:%A, %b} {local.day}*", [21, 0, 4, 6, 8, 10]
@@ -254,6 +257,35 @@ def startup(cfg: dict, now: datetime, tz, active: list[tuple[Alert, Rating]] | N
     lines += ["*Active alerts:* unavailable (NWS feed error)"] if active is None else _alert_lines(active, now, tz)
     if cfg["parkway"].get("enabled"):
         lines += _parkway_lines(sections, as_of, cfg)
+    return "\n".join(lines)
+
+
+def guide(cfg: dict) -> str:
+    """The 'how to read these alerts' message."""
+    county = cfg["site"]["county"]
+    morning, evening = (
+        fmt_clock(datetime.strptime(cfg["briefs"][f"{kind}_time"], "%H:%M")) for kind in ("morning", "evening")
+    )
+    lines = [
+        "ℹ️ *How to read these alerts*",
+        "🚨 *Act now* — a warning that calls for action: tornado, severe thunderstorm, flash flood, winter storm "
+        "or ice storm. Pings everyone here. Storm warnings say whether campus is inside the warning area.",
+        "⚠️ *Heads up* — a watch or advisory worth knowing about. No ping.",
+        "🔄 *Update* and ✅ *ended* notices reply in the same thread as the alert they belong to.",
+    ]
+    if cfg.get("ncdot", {}).get("enabled"):
+        lines.append(f"🚧 *Road closure* — NCDOT reports a full closure or major incident in {county}.")
+        lines.append("🧊 *Road conditions* — NCDOT's snow and ice report for the county has changed.")
+    if cfg["parkway"].get("enabled"):
+        lines.append("🚧 *Parkway* — a Blue Ridge Parkway section around Asheville has opened or closed.")
+    lines += [
+        f"🌅 🌙 *Briefs* — summaries at {morning} and {evening}, sent only when "
+        "an alert is active or winter weather is in the forecast. No message means nothing to flag.",
+        "📋 *Conditions update* — current alerts, campus forecast and roads, posted when someone asks for it.",
+        "🛠️ *Monitor notice* — one of the data sources is unreachable; check it directly until it clears.",
+        "_This supplements phone emergency alerts and a NOAA weather radio; it does not replace them. "
+        "Alerts here can lag the official warning by several minutes._",
+    ]
     return "\n".join(lines)
 
 

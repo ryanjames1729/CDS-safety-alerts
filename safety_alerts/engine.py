@@ -254,24 +254,27 @@ class Monitor:
         now = self.clock()
         today = now.astimezone(self.tz).date().isoformat()
         try:
-            outlook = forecast.fetch_outlook(self.cfg, self.state, now, 14 if kind == "morning" else 16)
+            outlook = forecast.fetch_outlook(self.cfg, self.state, now, 16 if kind == "evening" else 14)
         except SourceError as exc:
             print(f"Forecast unavailable: {exc}", flush=True)
             outlook = None
 
-        if kind == "evening" and not forced:
+        if not forced:
+            # Scheduled briefs only go out when there is something to flag.
             alerting = any(rating.tier <= 2 for _, rating in self.active or [])
             if not alerting and outlook is None:
                 return  # cannot judge yet; try again on the next run
             if not alerting and not outlook.notable:
                 self.state.setdefault("briefs", {})[kind] = today
-                print("Evening outlook: nothing to flag, not sent.", flush=True)
+                print(f"{kind.title()} brief: nothing to flag, not sent.", flush=True)
                 return
 
         text = messages.brief(
             kind, self.cfg, now, self.tz, self.active, outlook, self.sections, self.as_of, self.roads
         )
-        if self._post(text, f"brief-{kind}-{today}"):
+        if kind == "status":
+            self._post(text, f"status-{now:%Y%m%dT%H%M%S}")
+        elif self._post(text, f"brief-{kind}-{today}"):
             self.state.setdefault("briefs", {})[kind] = today
 
     # --- one pass -----------------------------------------------------------

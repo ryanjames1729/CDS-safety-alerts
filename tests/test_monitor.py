@@ -6,6 +6,7 @@ import copy
 import json
 import tomllib
 import unittest
+from unittest import mock
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -483,6 +484,46 @@ class Briefs(unittest.TestCase):
         clock.now = datetime(2026, 1, 18, 19, 5, tzinfo=tz)  # Sunday evening
         self.assertEqual(mon.due_briefs(), ["evening"])
 
+    def outlook(self, snow: float) -> forecast.Outlook:
+        hours = [forecast.Hour(NOW + timedelta(hours=i), 45, 5, "Mostly Sunny", "5 mph") for i in range(14)]
+        return forecast.Outlook(hours, 45, snow, 0.0, 12)
+
+    def test_scheduled_briefs_stay_silent_on_an_ordinary_day(self):
+        mon, chat, _ = monitor()
+        mon.active = []
+        with mock.patch.object(forecast, "fetch_outlook", return_value=self.outlook(snow=0.0)):
+            mon.send_brief("morning")
+            mon.send_brief("evening")
+        self.assertEqual(chat.sent, [])
+        self.assertEqual(mon.state["briefs"], {"morning": "2026-01-13", "evening": "2026-01-13"})
+
+    def test_scheduled_brief_goes_out_when_snow_is_forecast(self):
+        mon, chat, _ = monitor()
+        mon.active = []
+        with mock.patch.object(forecast, "fetch_outlook", return_value=self.outlook(snow=1.5)):
+            mon.send_brief("morning")
+        self.assertEqual(len(chat.sent), 1)
+        self.assertIn("Morning safety brief", chat.sent[0][1])
+        self.assertIn("snow 1.5 in", chat.sent[0][1])
+
+    def test_scheduled_brief_goes_out_when_an_alert_is_active(self):
+        mon, chat, _ = monitor()
+        mon.process_alerts(alerts(feature("Winter Weather Advisory", "w1", ADVISORY, ends=NOW + timedelta(hours=26))))
+        with mock.patch.object(forecast, "fetch_outlook", return_value=self.outlook(snow=0.0)):
+            mon.send_brief("evening")
+        self.assertIn("Evening outlook", chat.sent[-1][1])
+
+    def test_requested_update_always_posts_and_leaves_brief_state_alone(self):
+        mon, chat, _ = monitor()
+        mon.active = []
+        with mock.patch.object(forecast, "fetch_outlook", return_value=self.outlook(snow=0.0)):
+            mon.send_brief("status", forced=True)
+        self.assertEqual(len(chat.sent), 1)
+        self.assertIn("📋 *Conditions update — Tuesday 10 AM* (requested)", chat.sent[0][1])
+        self.assertIn("*Active alerts:* none", chat.sent[0][1])
+        self.assertIn("• 10 AM Tue: 45°F, Mostly Sunny", chat.sent[0][1])
+        self.assertNotIn("briefs", mon.state)
+
     def test_brief_reports_alerts_closures_and_winter_flags(self):
         mon, _, _ = monitor()
         mon.process_alerts(alerts(feature("Winter Weather Advisory", "w1", ADVISORY, ends=NOW + timedelta(hours=26))))
@@ -495,6 +536,15 @@ class Briefs(unittest.TestCase):
         self.assertIn("snow 1.4 in · ice 0.05 in · peak gust 22 mph", text)
         self.assertIn("❄️ *Wintry or freezing precipitation possible:* 10 AM–1 PM Tue", text)
         self.assertIn("3 of 19 sections closed", text)
+
+
+class Guide(unittest.TestCase):
+    def test_guide_explains_each_kind_of_message(self):
+        text = messages.guide(CONFIG)
+        for icon in ("🚨", "⚠️", "🔄", "✅", "🚧", "🧊", "🌅", "📋", "🛠️"):
+            self.assertIn(icon, text)
+        self.assertIn("summaries at 5 AM and 7 PM", text)
+        self.assertLess(len(text), 3900)
 
 
 class Startup(unittest.TestCase):

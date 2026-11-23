@@ -1,0 +1,41 @@
+name: On request
+
+# Posts to the Chat space when someone asks: "update" for current weather and
+# road conditions, "help" for the guide to reading the alerts.
+# Kept separate from the alert monitor so a request never waits behind it.
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: What to post
+        type: choice
+        default: update
+        options:
+          - update
+          - help
+
+permissions:
+  contents: read
+
+concurrency:
+  group: on-request
+  cancel-in-progress: false
+
+jobs:
+  respond:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GOOGLE_CHAT_WEBHOOK_URL: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+      NCDOT_API_KEY: ${{ secrets.NCDOT_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Post reply
+        env:
+          COMMAND: ${{ inputs.command || 'update' }}
+        run: |
+          if [ "$COMMAND" = "help" ]; then
+            python3 -m safety_alerts --guide
+          else
+            python3 -m safety_alerts --brief status
+          fi

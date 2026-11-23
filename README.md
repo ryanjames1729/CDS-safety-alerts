@@ -13,8 +13,10 @@ Posts weather and road-status alerts for Buncombe County to a Google Chat space,
 | 🚧 **Parkway** | A Blue Ridge Parkway section around Asheville opens or closes (Ox Creek Rd at milepost 375.7 to NC-191 at 393.6) | New message, no ping |
 | 🚧 **Road closure** | NCDOT reports a full closure or major incident in Buncombe County; a reply follows when it clears | New message, no ping |
 | 🧊 **Road conditions** | NCDOT's Snow & Ice report for Buncombe County changes (interstates, US/NC routes, secondary roads) | New message, no ping |
-| 🌅 **Morning brief** | 5:00 AM on school days, always | Active alerts, campus forecast through the day, snow and ice totals, NCDOT road conditions and closures, Parkway closures |
-| 🌙 **Evening outlook** | 7:00 PM Sunday to Thursday, only if there is an alert, snow or ice, or freezing precipitation in the forecast | Same content, looking at the next morning |
+| 🌅 **Morning brief** | 5:00 AM on school days, only if there is an alert, snow or ice, or freezing precipitation in the forecast | Active alerts, campus forecast through the day, snow and ice totals, NCDOT road conditions and closures, Parkway closures |
+| 🌙 **Evening outlook** | 7:00 PM Sunday to Thursday, on the same condition | Same content, looking at the next morning |
+| 📋 **Conditions update** | Whenever someone asks for one | Same content, as of now |
+| ℹ️ **Guide** | Whenever someone asks for it | How to read each kind of message |
 | 🛠️ **Monitor notice** | A data source has been unreachable for 15 minutes, and when it recovers | New message |
 
 Tornado, severe thunderstorm and flash flood warnings are drawn as a polygon around the storm. The message says whether campus is inside it, and warnings that miss campus do not ping (a tornado warning anywhere in the county always does).
@@ -30,7 +32,11 @@ Sources: [NWS alerts and forecast API](https://www.weather.gov/documentation/ser
 5. **Make `main` the default branch** (*Settings* → *General* → *Default branch*). GitHub only runs scheduled workflows from the default branch.
 6. **Send a test.** *Actions* → *Safety alerts* → *Run workflow* → choose `test-message`. A test message should appear in the space. The next scheduled run posts a one-time "monitor is online" summary.
 
-The same *Run workflow* menu can send a morning or evening brief on demand.
+## Asking for an update
+
+*Actions* → *On request* → *Run workflow* posts either a conditions update (`update`) or the guide to reading the alerts (`help`) within about half a minute.
+
+Triggering these by typing a command in the Chat space needs a small Google Chat app, because the webhook this monitor posts through is one-way: it cannot see what people type. That app is not built yet.
 
 ## Changing what gets posted
 
@@ -39,7 +45,7 @@ Everything adjustable is in [`config.toml`](config.toml): which alert types are 
 ## Limits to know about
 
 - **This supplements, and does not replace, phone emergency alerts and a NOAA weather radio.** GitHub usually starts scheduled runs within a few minutes, but can be 10 to 20 minutes late at busy times, and can skip runs entirely. Once a run starts it checks NWS every minute for four minutes; NCDOT and the Parkway are checked once per run.
-- **Missing morning brief means something is wrong.** It is sent every school day even when nothing is happening, so its absence is the signal to look at the *Actions* tab. GitHub also emails the repository owner when a run fails, and disables schedules in repositories with no activity for 60 days.
+- **Silence is normal, so it does not prove the monitor is running.** On an ordinary day nothing is posted. To check, ask for a conditions update, or look at the *Actions* tab for recent *Safety alerts* runs. GitHub emails the repository owner when a run fails, and disables schedules in repositories with no activity for 60 days.
 - The repository is public, so run logs and `config.toml` are visible to anyone. The webhook URL is not; it lives only in the repository secret.
 
 ## How it works
