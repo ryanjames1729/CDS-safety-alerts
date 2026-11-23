@@ -1,0 +1,117 @@
+# Safety alert monitor settings.
+# Edit this file on GitHub and commit; the next scheduled run picks it up.
+
+[site]
+name = "Carolina Day School"
+county = "Buncombe County"
+# Campus location. Used to decide whether a warning polygon covers campus and
+# to pull the point forecast. CONFIRM THESE: right-click the campus in Google
+# Maps and copy the coordinates.
+latitude = 35.5357
+longitude = -82.5306
+timezone = "America/New_York"
+
+[nws]
+# NWS zone and county codes to watch. NCZ053 = Buncombe forecast zone,
+# NCC021 = Buncombe County (used by tornado / thunderstorm / flood warnings).
+zones = ["NCZ053", "NCC021"]
+# NWS asks API users to identify themselves; adding a contact email is polite.
+user_agent = "school-safety-alerts/1.0"
+
+[chat]
+# Added to "act now" alerts so everyone in the space is notified.
+# Use "" to turn pings off.
+mention = "<users/all>"
+
+[tiers]
+# ACT NOW: posted immediately with a ping.
+# Warnings drawn as a polygon (tornado, severe thunderstorm, flash flood) only
+# ping when campus is inside the polygon, except those in always_ping.
+act_now = [
+  "Tornado Warning",
+  "Severe Thunderstorm Warning",
+  "Flash Flood Warning",
+  "Extreme Wind Warning",
+  "Snow Squall Warning",
+  "Winter Storm Warning",
+  "Ice Storm Warning",
+  "Blizzard Warning",
+  "Hurricane Warning",
+  "Tropical Storm Warning",
+  "Civil Danger Warning",
+  "Civil Emergency Message",
+  "Shelter In Place Warning",
+  "Evacuation Immediate",
+  "Law Enforcement Warning",
+  "Hazardous Materials Warning",
+  "Fire Warning",
+  "Earthquake Warning",
+  "Radiological Hazard Warning",
+  "Nuclear Power Plant Warning",
+  "Local Area Emergency",
+  "911 Telephone Outage",
+]
+always_ping = ["Tornado Warning"]
+
+# HEADS UP: posted immediately, no ping.
+heads_up = [
+  "Tornado Watch",
+  "Severe Thunderstorm Watch",
+  "Flood Watch",
+  "Flash Flood Watch",
+  "Flood Warning",
+  "Flood Advisory",
+  "Winter Storm Watch",
+  "Winter Weather Advisory",
+  "Freezing Rain Advisory",
+  "Extreme Cold Warning",
+  "Extreme Cold Watch",
+  "Cold Weather Advisory",
+  "Wind Chill Warning",
+  "Wind Chill Advisory",
+  "High Wind Warning",
+  "High Wind Watch",
+  "Wind Advisory",
+  "Dense Fog Advisory",
+  "Freezing Fog Advisory",
+  "Extreme Heat Warning",
+  "Extreme Heat Watch",
+  "Excessive Heat Warning",
+  "Heat Advisory",
+  "Hurricane Watch",
+  "Tropical Storm Watch",
+  "Red Flag Warning",
+  "Air Quality Alert",
+  "Dense Smoke Advisory",
+  "Special Weather Statement",
+]
+
+# Never posted and left out of the briefs.
+ignore = []
+# Anything not listed above: "Severe"/"Extreme" alerts are treated as heads up,
+# everything else appears in the daily brief only.
+
+[parkway]
+enabled = true
+url = "https://www.nps.gov/blri/planyourvisit/roadclosures.htm"
+# Blue Ridge Parkway mileposts that fall in Buncombe County
+# (Mount Mitchell turnoff south to the NC-151 access near Mount Pisgah).
+milepost_min = 355.0
+milepost_max = 406.0
+
+[briefs]
+# Morning brief: sent on these days whether or not anything is happening, so
+# its arrival also confirms the monitor is running. 0 = Monday ... 6 = Sunday.
+morning_time = "05:00"
+morning_days = [0, 1, 2, 3, 4]
+# Evening outlook for the next morning: only sent when there is something to
+# flag (active alert, snow or ice in the forecast, or freezing temperatures
+# with precipitation).
+evening_time = "19:00"
+evening_days = [6, 0, 1, 2, 3]
+# How late a brief may still be sent if the scheduler runs behind.
+max_late_minutes = 180
+
+[health]
+# Post a notice when a data source has been unreachable this long.
+notify_after_minutes = 15

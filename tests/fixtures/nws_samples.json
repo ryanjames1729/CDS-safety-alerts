@@ -1,0 +1,612 @@
+{
+ "tornado_continued": {
+  "type": "Feature",
+  "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.5e93325f0032597763a4bb8b505ff801705b9c35.001.1",
+  "geometry": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      -80.31,
+      27.34
+     ],
+     [
+      -80.23,
+      27.4
+     ],
+     [
+      -80.18,
+      27.28
+     ],
+     [
+      -80.23,
+      27.26
+     ],
+     [
+      -80.28,
+      27.26
+     ],
+     [
+      -80.31,
+      27.34
+     ]
+    ]
+   ]
+  },
+  "properties": {
+   "id": "urn:oid:2.49.0.1.840.0.5e93325f0032597763a4bb8b505ff801705b9c35.001.1",
+   "event": "Tornado Warning",
+   "status": "Actual",
+   "messageType": "Update",
+   "severity": "Extreme",
+   "urgency": "Immediate",
+   "certainty": "Observed",
+   "headline": "Tornado Warning issued November 21 at 10:28PM EST until November 21 at 10:45PM EST by NWS Melbourne FL",
+   "description": "At 1028 PM EST, a severe thunderstorm capable of producing a tornado\nwas located near the Saint Lucie Nuclear Power Plant, moving\nnortheast at 20 mph.\n\nHAZARD...Tornado.\n\nSOURCE...Radar indicated rotation.\n\nIMPACT...Flying debris will be dangerous to those caught without\nshelter. Mobile homes will be damaged or destroyed. Damage\nto roofs, windows and vehicles will occur. Tree damage is\nlikely.\n\nLocations impacted include...\nWalton, Saint Lucie Nuclear Power Plant, Nettles Island, Indian\nRiver Estates and Hutchinson Island South.",
+   "instruction": "Move to an interior room on the lowest floor of a well-built building\naway from windows. If you are outdoors, in a mobile home, or in a\nvehicle, move to the closest substantial shelter and protect yourself\nfrom flying debris.",
+   "onset": "2026-11-21T22:28:00-05:00",
+   "effective": "2026-11-21T22:28:00-05:00",
+   "ends": "2026-11-21T22:45:00-05:00",
+   "expires": "2026-11-21T22:45:00-05:00",
+   "areaDesc": "St. Lucie, FL",
+   "parameters": {
+    "AWIPSidentifier": [
+     "SVSMLB"
+    ],
+    "WMOidentifier": [
+     "WWUS52 KMLB 220328"
+    ],
+    "NWSheadline": [
+     "TORNADO WARNING REMAINS IN EFFECT UNTIL 1045 PM EST FOR EAST CENTRAL ST. LUCIE COUNTY"
+    ],
+    "eventMotionDescription": [
+     "2026-11-22T03:18:00-00:00...storm...222DEG...18KT...27.3,-80.29"
+    ],
+    "maxHailSize": [
+     "0.00"
+    ],
+    "tornadoDetection": [
+     "RADAR INDICATED"
+    ],
+    "BLOCKCHANNEL": [
+     "EAS",
+     "NWEM",
+     "CMAS"
+    ],
+    "EAS-ORG": [
+     "WXR"
+    ],
+    "VTEC": [
+     "/O.CON.KMLB.TO.W.0007.000000T0000Z-261122T0345Z/"
+    ],
+    "eventEndingTime": [
+     "2026-11-21T22:45:00-05:00"
+    ]
+   },
+   "references": [
+    {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.0622d44016cb27c2c63b0c46f10ed0900e562207.001.1",
+     "identifier": "urn:oid:2.49.0.1.840.0.0622d44016cb27c2c63b0c46f10ed0900e562207.001.1",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "sent": "2026-11-21T22:18:00-05:00"
+    }
+   ]
+  }
+ },
+ "tornado_cancelled": {
+  "type": "Feature",
+  "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.19d4f2bc5fd207c21a53f3f437f81a51559ffe9f.001.1",
+  "geometry": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      -80.31,
+      27.34
+     ],
+     [
+      -80.23,
+      27.4
+     ],
+     [
+      -80.18,
+      27.28
+     ],
+     [
+      -80.23,
+      27.26
+     ],
+     [
+      -80.28,
+      27.26
+     ],
+     [
+      -80.31,
+      27.34
+     ]
+    ]
+   ]
+  },
+  "properties": {
+   "id": "urn:oid:2.49.0.1.840.0.19d4f2bc5fd207c21a53f3f437f81a51559ffe9f.001.1",
+   "event": "Tornado Warning",
+   "status": "Actual",
+   "messageType": "Cancel",
+   "severity": "Minor",
+   "urgency": "Past",
+   "certainty": "Observed",
+   "headline": "The Tornado Warning has been cancelled.",
+   "description": "The Tornado Warning has been cancelled and is no longer in effect.",
+   "instruction": null,
+   "onset": "2026-11-21T22:37:00-05:00",
+   "effective": "2026-11-21T22:37:00-05:00",
+   "ends": "2026-11-21T22:45:00-05:00",
+   "expires": "2026-11-21T22:52:54-05:00",
+   "areaDesc": "St. Lucie, FL",
+   "parameters": {
+    "AWIPSidentifier": [
+     "SVSMLB"
+    ],
+    "WMOidentifier": [
+     "WWUS52 KMLB 220337"
+    ],
+    "NWSheadline": [
+     "TORNADO WARNING IS CANCELLED FOR EAST CENTRAL ST. LUCIE COUNTY"
+    ],
+    "eventMotionDescription": [
+     "2026-11-22T03:28:00-00:00...storm...222DEG...18KT...27.34,-80.25"
+    ],
+    "BLOCKCHANNEL": [
+     "EAS",
+     "NWEM",
+     "CMAS"
+    ],
+    "EAS-ORG": [
+     "WXR"
+    ],
+    "VTEC": [
+     "/O.CAN.KMLB.TO.W.0007.000000T0000Z-261122T0345Z/"
+    ],
+    "eventEndingTime": [
+     "2026-11-21T22:45:00-05:00"
+    ]
+   },
+   "references": [
+    {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.0622d44016cb27c2c63b0c46f10ed0900e562207.001.1",
+     "identifier": "urn:oid:2.49.0.1.840.0.0622d44016cb27c2c63b0c46f10ed0900e562207.001.1",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "sent": "2026-11-21T22:18:00-05:00"
+    },
+    {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.5e93325f0032597763a4bb8b505ff801705b9c35.001.1",
+     "identifier": "urn:oid:2.49.0.1.840.0.5e93325f0032597763a4bb8b505ff801705b9c35.001.1",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "sent": "2026-11-21T22:28:00-05:00"
+    }
+   ]
+  }
+ },
+ "severe_thunderstorm": {
+  "type": "Feature",
+  "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.b6152ed2136598d247820ea2dbc8276a02e2c73c.001.1",
+  "geometry": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      -92.16,
+      33.6
+     ],
+     [
+      -92.17,
+      33.7
+     ],
+     [
+      -91.99,
+      33.69
+     ],
+     [
+      -91.98,
+      33.53
+     ],
+     [
+      -92.01,
+      33.53
+     ],
+     [
+      -92.16,
+      33.6
+     ]
+    ]
+   ]
+  },
+  "properties": {
+   "id": "urn:oid:2.49.0.1.840.0.b6152ed2136598d247820ea2dbc8276a02e2c73c.001.1",
+   "event": "Severe Thunderstorm Warning",
+   "status": "Actual",
+   "messageType": "Update",
+   "severity": "Severe",
+   "urgency": "Immediate",
+   "certainty": "Observed",
+   "headline": "Severe Thunderstorm Warning issued November 22 at 4:49PM CST until November 22 at 5:00PM CST by NWS Little Rock AR",
+   "description": "At 449 PM CST, a severe thunderstorm was located over Warren, moving\neast at 30 mph.\n\nHAZARD...60 mph wind gusts and quarter size hail.\n\nSOURCE...Radar indicated.\n\nIMPACT...Hail damage to vehicles is expected. Expect wind damage to\nroofs, siding, and trees.\n\nLocations impacted include...\nWarren...",
+   "instruction": "For your protection move to an interior room on the lowest floor of a\nbuilding.",
+   "onset": "2026-11-22T16:49:00-06:00",
+   "effective": "2026-11-22T16:49:00-06:00",
+   "ends": "2026-11-22T17:00:00-06:00",
+   "expires": "2026-11-22T17:00:00-06:00",
+   "areaDesc": "Bradley, AR",
+   "parameters": {
+    "AWIPSidentifier": [
+     "SVSLZK"
+    ],
+    "WMOidentifier": [
+     "WWUS54 KLZK 222249"
+    ],
+    "NWSheadline": [
+     "A SEVERE THUNDERSTORM WARNING REMAINS IN EFFECT UNTIL 500 PM CST FOR NORTHEASTERN BRADLEY COUNTY"
+    ],
+    "eventMotionDescription": [
+     "2026-11-22T22:49:00-00:00...storm...290DEG...24KT...33.62,-92.09"
+    ],
+    "windThreat": [
+     "RADAR INDICATED"
+    ],
+    "maxWindGust": [
+     "60 MPH"
+    ],
+    "hailThreat": [
+     "RADAR INDICATED"
+    ],
+    "maxHailSize": [
+     "1.00"
+    ],
+    "BLOCKCHANNEL": [
+     "EAS",
+     "NWEM",
+     "CMAS"
+    ],
+    "EAS-ORG": [
+     "WXR"
+    ],
+    "VTEC": [
+     "/O.CON.KLZK.SV.W.0364.000000T0000Z-261122T2300Z/"
+    ],
+    "eventEndingTime": [
+     "2026-11-22T17:00:00-06:00"
+    ]
+   },
+   "references": [
+    {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.d015314d9a71405340968115ffef9bec5525de4f.001.1",
+     "identifier": "urn:oid:2.49.0.1.840.0.d015314d9a71405340968115ffef9bec5525de4f.001.1",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "sent": "2026-11-22T16:34:00-06:00"
+    },
+    {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.9b5fe91c5f1969975915afa23e11649bef7ae75a.001.1",
+     "identifier": "urn:oid:2.49.0.1.840.0.9b5fe91c5f1969975915afa23e11649bef7ae75a.001.1",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "sent": "2026-11-22T16:42:00-06:00"
+    }
+   ]
+  }
+ },
+ "winter_storm_expired": {
+  "type": "Feature",
+  "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.81bf9fad16bed802455b0531a933abe6c552bfc7.001.1",
+  "geometry": null,
+  "properties": {
+   "id": "urn:oid:2.49.0.1.840.0.81bf9fad16bed802455b0531a933abe6c552bfc7.001.1",
+   "event": "Winter Storm Warning",
+   "status": "Actual",
+   "messageType": "Alert",
+   "severity": "Severe",
+   "urgency": "Expected",
+   "certainty": "Likely",
+   "headline": "Winter Storm Warning issued November 21 at 11:05AM MST until November 21 at 11:00AM MST by NWS Salt Lake City UT",
+   "description": "Occasional snow showers will persist into the afternoon with little\nto no accumulation. Therefore the Winter Storm Warning has been\nallowed to expire.",
+   "instruction": null,
+   "onset": "2026-11-21T11:05:00-07:00",
+   "effective": "2026-11-21T11:05:00-07:00",
+   "ends": "2026-11-21T11:00:00-07:00",
+   "expires": "2026-11-21T12:15:00-07:00",
+   "areaDesc": "Wasatch Mountains I-80 North",
+   "parameters": {
+    "AWIPSidentifier": [
+     "WSWSLC"
+    ],
+    "WMOidentifier": [
+     "WWUS45 KSLC 211805"
+    ],
+    "NWSheadline": [
+     "WINTER STORM WARNING HAS EXPIRED"
+    ],
+    "BLOCKCHANNEL": [
+     "EAS",
+     "NWEM",
+     "CMAS"
+    ],
+    "EAS-ORG": [
+     "WXR"
+    ],
+    "VTEC": [
+     "/O.EXP.KSLC.WS.W.0003.000000T0000Z-261121T1800Z/"
+    ],
+    "eventEndingTime": [
+     "2026-11-21T11:00:00-07:00"
+    ],
+    "expiredReferences": [
+     "w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.b1022fce1e5b4f066138e67c1613a6aad11f493e.003.1,2026-11-21T05:05:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.1093399ba9c42e10260cb3189230d1bf7d7cf6c7.001.1,2026-11-20T22:48:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.6d0f8f1654e5e9548896d57d9c18f84c4b28730b.002.1,2026-11-20T10:24:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.a40e58c11f1b79e42c843f0f09b248fec826dbc0.001.1,2026-11-19T22:20:00-07:00 w-nws.webmaster@noaa.gov,urn:oid:2.49.0.1.840.0.3630af10624b8577444db9d60f2d1bb2b08ec909.001.2,2026-11-19T09:33:00-07:00"
+    ]
+   },
+   "references": []
+  }
+ },
+ "winter_weather_advisory": {
+  "type": "Feature",
+  "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.ad473273ca10afafbcc9bd51b0609a83d98763a2.001.1",
+  "geometry": null,
+  "properties": {
+   "id": "urn:oid:2.49.0.1.840.0.ad473273ca10afafbcc9bd51b0609a83d98763a2.001.1",
+   "event": "Winter Weather Advisory",
+   "status": "Actual",
+   "messageType": "Update",
+   "severity": "Moderate",
+   "urgency": "Expected",
+   "certainty": "Likely",
+   "headline": "Winter Weather Advisory issued November 22 at 8:47PM EST until November 23 at 11:00AM EST by NWS Marquette MI",
+   "description": "* WHAT...Lake effect snow expected. Total snow accumulations between\n2 and 5 inches. Up to 8 inches underneath the dominant lake effect\nsnow band.\n\n* WHERE...Baraga, Northern Houghton, Ontonagon, and Southern Houghton\nCounties.\n\n* WHEN...Until 11 AM EST Monday.\n\n* IMPACTS...Plan on slippery road conditions. Moderate to heavy\nsnowfall rates will cause visibility to fall below 1 mile at times.\nThe hazardous conditions will impact the Monday morning commute.\n\n* ADDITIONAL DETAILS...A dominant lake effect band with heavy\nsnowfall rates up to 1 inch per hour at times will yield an area of\n6-8 inches of snow. Medium confidence in exact placement of this\nband. Area of focus is between Ontonagon, Painesdale, Herman,\nCovington, and Bruce Crossing. Heaviest snowfall expected to remain\nsouth of Houghton.",
+   "instruction": "Slow down and use caution while traveling.\n\nDuring lake effect snow, the weather can vary from bands of locally\nheavy snow to dry weather just a few miles away. Visibilities can\nalso vary greatly. Be prepared for rapid changes in weather,\nvisibility, and road conditions.",
+   "onset": "2026-11-22T20:47:00-05:00",
+   "effective": "2026-11-22T20:47:00-05:00",
+   "ends": "2026-11-23T11:00:00-05:00",
+   "expires": "2026-11-23T05:15:00-05:00",
+   "areaDesc": "Ontonagon; Houghton; Baraga; Southern Houghton",
+   "parameters": {
+    "AWIPSidentifier": [
+     "WSWMQT"
+    ],
+    "WMOidentifier": [
+     "WWUS43 KMQT 230147"
+    ],
+    "NWSheadline": [
+     "WINTER WEATHER ADVISORY REMAINS IN EFFECT UNTIL 11 AM EST MONDAY"
+    ],
+    "BLOCKCHANNEL": [
+     "EAS",
+     "NWEM",
+     "CMAS"
+    ],
+    "VTEC": [
+     "/O.CON.KMQT.WW.Y.0027.000000T0000Z-261123T1600Z/"
+    ],
+    "eventEndingTime": [
+     "2026-11-23T11:00:00-05:00"
+    ]
+   },
+   "references": [
+    {
+     "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.40a2355f9ea462f1c6f376ce878c199405403962.001.1",
+     "identifier": "urn:oid:2.49.0.1.840.0.40a2355f9ea462f1c6f376ce878c199405403962.001.1",
+     "sender": "w-nws.webmaster@noaa.gov",
+     "sent": "2026-11-22T14:09:00-05:00"
+    }
+   ]
+  }
+ },
+ "special_weather_statement": {
+  "type": "Feature",
+  "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.90881758384cc13b6694c70502ee92d282c7212c.001.1",
+  "geometry": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      -71.4,
+      41.44
+     ],
+     [
+      -71.43,
+      41.84
+     ],
+     [
+      -70.69,
+      41.76
+     ],
+     [
+      -70.87,
+      41.54
+     ],
+     [
+      -70.96,
+      41.49
+     ],
+     [
+      -70.95,
+      41.48
+     ],
+     [
+      -70.92,
+      41.48
+     ],
+     [
+      -70.94,
+      41.46
+     ],
+     [
+      -70.96,
+      41.46
+     ],
+     [
+      -70.95,
+      41.47
+     ],
+     [
+      -70.97,
+      41.49
+     ],
+     [
+      -71.01,
+      41.46
+     ],
+     [
+      -71.4,
+      41.44
+     ]
+    ]
+   ]
+  },
+  "properties": {
+   "id": "urn:oid:2.49.0.1.840.0.90881758384cc13b6694c70502ee92d282c7212c.001.1",
+   "event": "Special Weather Statement",
+   "status": "Actual",
+   "messageType": "Alert",
+   "severity": "Moderate",
+   "urgency": "Expected",
+   "certainty": "Observed",
+   "headline": "Special Weather Statement issued November 22 at 9:28PM EST by NWS Boston/Norton MA",
+   "description": "At 927 PM EST, Doppler radar was tracking an area of heavy rainfall\nover Westport, or over Dartmouth, moving north at 20 mph.\n\nHAZARD...Heavy rain.\n\nSOURCE...Radar indicated.\n\nIMPACT...Minimal. Water on roads that flood easily.\n\nLocations impacted include...\nProvidence, New Bedford, Fall River, Warwick, Cranston, East\nProvidence, Dartmouth, North Kingstown, Newport, Bristol, Marion,\nWareham, Somerset, Portsmouth, Barrington, Middletown, Fairhaven,\nSwansea, Tiverton, and Westport.",
+   "instruction": "Do not drive through flooded roads or underpasses.",
+   "onset": "2026-11-22T21:28:00-05:00",
+   "effective": "2026-11-22T21:28:00-05:00",
+   "ends": null,
+   "expires": "2026-11-22T23:00:00-05:00",
+   "areaDesc": "Northern Bristol; Western Plymouth; Southern Bristol; Southern Plymouth; Southeast Providence; Eastern Kent; Bristol; Washington; Newport",
+   "parameters": {
+    "AWIPSidentifier": [
+     "SPSBOX"
+    ],
+    "WMOidentifier": [
+     "WWUS81 KBOX 230228"
+    ],
+    "NWSheadline": [
+     "HEAVY RAINFALL CAUSING MINOR FLOODING IN PORTIONS OF RHODE ISLAND AND SOUTHEAST MASSACHUSETTS..  At 927 PM EST, Doppler radar was tracking an area of heavy rainfall over Westport, or over Dartmouth, moving north at 20 mph.  HAZARD...Heavy rain.  SOURCE...Radar indicated.  IMPACT...Minimal. Water on roads that flood easily.  Locations impacted include"
+    ],
+    "eventMotionDescription": [
+     "2026-11-23T02:27:00-00:00...storm...188DEG...36KT...41.62,-71.05"
+    ],
+    "BLOCKCHANNEL": [
+     "EAS",
+     "NWEM",
+     "CMAS"
+    ],
+    "EAS-ORG": [
+     "WXR"
+    ]
+   },
+   "references": []
+  }
+ },
+ "flash_flood_new": {
+  "type": "Feature",
+  "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.3ca591feb28e7469d75ec490b68dbc7f000fc068.001.1",
+  "geometry": {
+   "type": "Polygon",
+   "coordinates": [
+    [
+     [
+      -66.25,
+      18.45
+     ],
+     [
+      -66.21,
+      18.46
+     ],
+     [
+      -66.19,
+      18.45
+     ],
+     [
+      -66.21,
+      18.47
+     ],
+     [
+      -66.19,
+      18.48
+     ],
+     [
+      -66.16,
+      18.45
+     ],
+     [
+      -66.14,
+      18.48
+     ],
+     [
+      -66.16,
+      18.44
+     ],
+     [
+      -66.14,
+      18.46
+     ],
+     [
+      -66.14,
+      18.44
+     ],
+     [
+      -66.11,
+      18.44
+     ],
+     [
+      -66.1,
+      18.42
+     ],
+     [
+      -66.11,
+      18.37
+     ],
+     [
+      -66.25,
+      18.45
+     ]
+    ]
+   ]
+  },
+  "properties": {
+   "id": "urn:oid:2.49.0.1.840.0.3ca591feb28e7469d75ec490b68dbc7f000fc068.001.1",
+   "event": "Flash Flood Warning",
+   "status": "Actual",
+   "messageType": "Alert",
+   "severity": "Severe",
+   "urgency": "Immediate",
+   "certainty": "Likely",
+   "headline": "Flash Flood Warning issued November 22 at 2:01PM AST until November 22 at 5:00PM AST by NWS San Juan PR",
+   "description": "FFWSJU\n\nThe National Weather Service in San Juan has issued a\n\n* Flash Flood Warning for...\nBayamon...Catano...Guaynabo and Toa Baja...\n\n* Until 500 PM AST.\n\n* At 201 PM AST, Doppler radar indicated strong thunderstorms\nproducing heavy rain across the warned area, including northern\nGuaynabo and northern Bayamon. Up to 3 inches of rain have fallen.\nAdditional rainfall amounts of 1 to 3 inches are possible in the\nwarned area. Flash flooding is ongoing or expected to begin\nshortly.\n\nHAZARD...Flash flooding caused by thunderstorms.\n\nSOURCE...Radar indicated.\n\nIMPACT...Flash flooding of small creeks and streams, urban areas,\nhighways, streets and underpasses as well as other poor\ndrainage and low-lying areas.\n\n* Some locations that will experience flash flooding include...\nSabana Seca, Catano, Guaynabo, Levittown and Ingenio.",
+   "instruction": "Turn around, don't drown when encountering flooded roads. Most flood\ndeaths occur in vehicles.\n\nBe aware of your surroundings and do not drive on flooded roads.\n\nPlease report observed flooding to local emergency services or law\nenforcement and request they pass this information to the National\nWeather Service when you can do so safely.",
+   "onset": "2026-11-22T14:01:00-04:00",
+   "effective": "2026-11-22T14:01:00-04:00",
+   "ends": "2026-11-22T17:00:00-04:00",
+   "expires": "2026-11-22T17:00:00-04:00",
+   "areaDesc": "Bayamon, PR; Catano, PR; Guaynabo, PR; Toa Baja, PR",
+   "parameters": {
+    "AWIPSidentifier": [
+     "FFWSJU"
+    ],
+    "WMOidentifier": [
+     "WGCA52 TJSJ 221801"
+    ],
+    "flashFloodDetection": [
+     "RADAR INDICATED"
+    ],
+    "BLOCKCHANNEL": [
+     "EAS",
+     "NWEM",
+     "CMAS"
+    ],
+    "EAS-ORG": [
+     "WXR"
+    ],
+    "VTEC": [
+     "/O.NEW.TJSJ.FF.W.0044.261122T1801Z-261122T2100Z/"
+    ],
+    "eventEndingTime": [
+     "2026-11-22T17:00:00-04:00"
+    ]
+   },
+   "references": []
+  }
+ }
+}
