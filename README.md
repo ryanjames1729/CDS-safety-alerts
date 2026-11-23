@@ -11,7 +11,7 @@ Posts weather and road-status alerts for Buncombe County to a Google Chat space,
 | 🔄 **Updates** | An alert is extended, revised, or its storm polygon moves | Reply in the same thread |
 | ✅ **Ended** | An alert is cancelled or expires | Reply in the same thread |
 | 🚧 **Parkway** | A Blue Ridge Parkway section around Asheville opens or closes (Ox Creek Rd at milepost 375.7 to NC-191 at 393.6) | New message, no ping |
-| 🚧 **Road closure** | NCDOT reports a full closure or major incident in Buncombe County; a reply follows when it clears | New message, no ping |
+| 🚧 **Road closure** | NCDOT reports a road in Buncombe County closed by weather or an incident; a reply follows when it reopens. Scheduled roadwork closures are only counted in summaries | New message, no ping |
 | 🧊 **Road conditions** | NCDOT's Snow & Ice report for Buncombe County changes (interstates, US/NC routes, secondary roads) | New message, no ping |
 | 🌅 **Morning brief** | 5:00 AM on school days, only if there is an alert, snow or ice, or freezing precipitation in the forecast | Active alerts, campus forecast through the day, snow and ice totals, NCDOT road conditions and closures, Parkway closures |
 | 🌙 **Evening outlook** | 7:00 PM Sunday to Thursday, on the same condition | Same content, looking at the next morning |

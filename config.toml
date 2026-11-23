@@ -116,10 +116,17 @@ milepost_max = 393.6
 # Needs the NCDOT_API_KEY repository secret; without it this source is skipped.
 enabled = true
 county = "Buncombe"
-# Full closures always get their own message. Other crashes and incidents only
-# do at these severities; everything else is left out.
+# Weather and incident closures get their own message, and a reply when the
+# road reopens. Crashes that do not close the road only do at these severities.
 incident_severities = ["Major"]
-# In the briefs, closures older than this are counted but not listed one by one.
+# Scheduled roadwork closures (overnight interstate work, ramp closures) are
+# counted in summaries but do not get their own message. Set to true to post
+# them as well; expect a burst of messages whenever NCDOT schedules work.
+post_roadwork_closures = false
+# Roads left out entirely. The Parkway has its own source below.
+ignore_roads = ["Blue Ridge Pkwy"]
+# In summaries, weather and incident closures older than this are named but
+# not described.
 list_days = 7
 
 [briefs]

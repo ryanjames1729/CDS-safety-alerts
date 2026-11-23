@@ -350,7 +350,7 @@ def road_item(event_id: int, county: str = "Buncombe", **changes) -> dict:
         "ID": event_id,
         "RoadwayName": "I-26",
         "DirectionOfTravel": "Eastbound",
-        "Description": "Vehicle Crash on I-26 Eastbound near Exit 37. All lanes closed.",
+        "Description": "Vehicle Crash on I-26 Eastbound near Exit 37.  All lanes closed. Id: 4411",
         "Reported": int(NOW.timestamp()) - 600,
         "StartDate": int(NOW.timestamp()) - 600,
         "LanesAffected": "All lanes closed",
@@ -380,6 +380,8 @@ def condition_item(county: str = "Buncombe", **changes) -> dict:
     return {**item, **changes}
 
 
+ROADWORK = dict(EventType="closures", OriginalEventType="roadwork", EventSubType="construction", Severity="None")
+WEATHER = dict(EventType="closures", OriginalEventType="weatherConditions", EventSubType="otherWeatherIncident", Severity="None")
 MINOR_CRASH = dict(EventType="accidentsAndIncidents", IsFullClosure=False, Severity="Minor", LanesAffected="1 Right lane closed")
 
 
@@ -415,6 +417,7 @@ class Roads(unittest.TestCase):
         thread, text = chat.sent[0]
         self.assertIn("🚧 *Road closure — US-25 Eastbound* (NCDOT)", text)
         self.assertIn("Lanes: All lanes closed · Severity: Major", text)
+        self.assertNotIn("Id:", text)
 
         mon.process_roads(parse(road_item(1)), {})
         self.assertEqual(chat.sent[1][0], thread)
@@ -432,18 +435,49 @@ class Roads(unittest.TestCase):
         mon.process_roads([], {})
         self.assertIn("• Overall: *No report* (was: Snow/Ice Covered)", chat.sent[1][1])
 
-    def test_brief_lists_recent_closures_and_counts_old_ones(self):
+    def test_scheduled_roadwork_closures_are_not_posted(self):
+        mon, chat, _ = monitor()
+        mon.process_roads([], {})
+        events = ncdot.parse_events(
+            [road_item(n, RoadwayName="I-26", **ROADWORK) for n in range(1, 13)]
+            + [road_item(20, RoadwayName="Blue Ridge Pkwy", **WEATHER)],
+            "Buncombe",
+        )
+        mon.process_roads(events, {})
+        self.assertEqual(chat.sent, [], "overnight roadwork and the Parkway (which has its own source) stay quiet")
+        mon.process_roads(events + ncdot.parse_events([road_item(30, RoadwayName="NC 9", **WEATHER)], "Buncombe"), {})
+        self.assertEqual(len(chat.sent), 1)
+        self.assertIn("Road closure — NC 9", chat.sent[0][1])
+
+    def test_closures_dropped_by_a_settings_change_do_not_announce_a_reopening(self):
+        mon, chat, _ = monitor()
+        mon.state["ncdot"] = {"conditions": {}, "events": {"7": {"where": "I-26 Westbound", "summary": "Construction"}}}
+        mon.process_roads(ncdot.parse_events([road_item(7, **ROADWORK)], "Buncombe"), {})
+        self.assertEqual(chat.sent, [])
+        self.assertEqual(mon.state["ncdot"]["events"], {})
+
+    def test_brief_groups_closures_by_kind(self):
         old = int(NOW.timestamp()) - 40 * 86400
         events = ncdot.parse_events(
-            [road_item(1), road_item(2, RoadwayName="SR-1103", Reported=old), road_item(3, **MINOR_CRASH)], "Buncombe"
+            [
+                road_item(1),
+                road_item(2, RoadwayName="NC 9", Reported=old, **WEATHER),
+                road_item(3, **MINOR_CRASH),
+                road_item(4, RoadwayName="Hill St", **ROADWORK),
+                road_item(5, RoadwayName="I-26", **ROADWORK),
+                road_item(6, RoadwayName="I-26", **ROADWORK),
+                road_item(7, RoadwayName="Blue Ridge Pkwy", **WEATHER),
+            ],
+            "Buncombe",
         )
         roads = {"events": events, "conditions": {"Overall": "Clear"}}
         text = messages.brief("morning", CONFIG, NOW, ZoneInfo("America/New_York"), [], None, None, "", roads)
         self.assertIn("*NCDOT road conditions:* Overall: Clear", text)
-        self.assertIn("*NCDOT closures and major incidents:* 2", text)
-        self.assertIn("• I-26 Eastbound: Vehicle Crash", text)
-        self.assertIn("• plus 1 more, mostly long-standing", text)
-        self.assertNotIn("SR-1103", text)
+        self.assertIn("*NCDOT closures:* 2 weather or incident · 3 scheduled roadwork", text)
+        self.assertIn("• I-26 Eastbound: Vehicle Crash on I-26 Eastbound near Exit 37. All lanes closed.", text)
+        self.assertIn("• Long-standing: NC 9", text)
+        self.assertIn("• Roadwork on: I-26, Hill St", text)
+        self.assertNotIn("Blue Ridge Pkwy", text)
         without = messages.brief("morning", CONFIG, NOW, ZoneInfo("America/New_York"), [], None, None, "")
         self.assertNotIn("NCDOT", without)
 

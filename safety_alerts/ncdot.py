@@ -7,6 +7,7 @@ limited to ten calls a minute).
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from urllib.parse import urlencode
 
@@ -44,6 +45,11 @@ class RoadEvent:
     @property
     def is_closure(self) -> bool:
         return self.full_closure or self.kind == "closures"
+
+    @property
+    def planned(self) -> bool:
+        """Scheduled roadwork, as opposed to a weather or incident closure."""
+        return "roadwork" in (self.kind, self.original_kind)
 
     @property
     def where(self) -> str:
@@ -87,7 +93,8 @@ def parse_events(items: list[dict], county: str) -> list[RoadEvent]:
                 id=str(item["ID"]),
                 road=text("RoadwayName") or "Road",
                 direction=text("DirectionOfTravel"),
-                description=text("Description"),
+                # Descriptions end with an internal reference such as "Id: 876".
+                description=re.sub(r"\s+", " ", re.sub(r"\s*Id:\s*\d+\s*$", "", text("Description"))),
                 kind=text("EventType"),
                 original_kind=text("OriginalEventType"),
                 subtype=text("EventSubType"),
@@ -117,11 +124,31 @@ def parse_conditions(items: list[dict], county: str) -> dict[str, str]:
     return found
 
 
+def is_ignored(event: RoadEvent, cfg: dict) -> bool:
+    return event.road in cfg["ncdot"].get("ignore_roads", [])
+
+
 def is_notable(event: RoadEvent, cfg: dict) -> bool:
-    """Worth its own message: a closure, or an incident at a listed severity."""
+    """Worth its own message: a weather or incident closure, or an incident at a listed severity.
+
+    Scheduled roadwork closures are left to the summaries unless the config says otherwise.
+    """
+    if is_ignored(event, cfg):
+        return False
     if event.is_closure:
-        return True
+        return not event.planned or bool(cfg["ncdot"].get("post_roadwork_closures"))
     return event.kind == "accidentsAndIncidents" and event.severity in cfg["ncdot"]["incident_severities"]
+
+
+def summarise(events: list[RoadEvent], cfg: dict) -> tuple[list[RoadEvent], list[RoadEvent]]:
+    """Split into (weather and incident items, scheduled roadwork closures)."""
+    kept = [e for e in events if not is_ignored(e, cfg)]
+    severities = cfg["ncdot"]["incident_severities"]
+    unplanned = [
+        e for e in kept if (e.is_closure and not e.planned) or (e.kind == "accidentsAndIncidents" and e.severity in severities)
+    ]
+    planned = [e for e in kept if e.is_closure and e.planned]
+    return unplanned, planned
 
 
 def fetch(cfg: dict, key: str) -> tuple[list[RoadEvent], dict[str, str]]:

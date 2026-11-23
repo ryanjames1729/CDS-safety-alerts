@@ -6,7 +6,7 @@ import re
 from datetime import datetime
 
 from .forecast import Outlook, describe_spans
-from .ncdot import MAP_URL, RoadEvent
+from .ncdot import MAP_URL, RoadEvent, summarise
 from .nws import Alert, Rating
 from .parkway import Section
 from .util import fmt_clock, fmt_when, truncate, unwrap
@@ -132,7 +132,7 @@ def road_event(event: RoadEvent) -> str:
 
 
 def road_event_cleared(where: str, summary: str) -> str:
-    return f"✅ *Cleared or reopened:* {where} — NCDOT no longer lists this as a closure or major incident.\n_{summary}_"
+    return f"✅ *Cleared or reopened:* {where} — NCDOT no longer lists this as closed.\n_{summary}_"
 
 
 def road_conditions_change(now: dict[str, str], before: dict[str, str], county: str) -> str:
@@ -151,19 +151,29 @@ def _road_lines(roads: dict | None, cfg: dict, now: datetime) -> list[str]:
     conditions = roads["conditions"]
     summary = " · ".join(f"{label}: {value}" for label, value in conditions.items()) or "no report"
     lines = [f"🚗 *NCDOT road conditions:* {summary}"]
-    events = [e for e in roads["events"] if e.is_closure or e.severity in cfg["ncdot"]["incident_severities"]]
-    if not events:
-        return lines + ["🚧 *NCDOT closures and major incidents:* none"]
+    unplanned, planned = summarise(roads["events"], cfg)
+    if not unplanned and not planned:
+        return lines + ["🚧 *NCDOT closures:* none"]
+    lines.append(f"🚧 *NCDOT closures:* {len(unplanned)} weather or incident · {len(planned)} scheduled roadwork")
     cutoff = now.timestamp() - cfg["ncdot"]["list_days"] * 86400
-    recent = sorted((e for e in events if e.reported >= cutoff), key=lambda e: -e.reported)
-    older = len(events) - len(recent)
-    lines.append(f"🚧 *NCDOT closures and major incidents:* {len(events)}")
+    recent = sorted((e for e in unplanned if e.reported >= cutoff), key=lambda e: -e.reported)
     for event in recent[:6]:
-        lines.append(f"• {event.where}: {truncate(event.description, 140)}")
-    hidden = older + max(0, len(recent) - 6)
-    if hidden:
-        lines.append(f"• plus {hidden} more, mostly long-standing (<{MAP_URL}|DriveNC map>)")
+        lines.append(f"• {event.where}: {truncate(event.description, 160)}")
+    older = [e for e in unplanned if e not in recent[:6]]
+    if older:
+        lines.append(f"• Long-standing: {_road_names(older)}")
+    if planned:
+        lines.append(f"• Roadwork on: {_road_names(planned)}")
+    lines.append(f"<{MAP_URL}|DriveNC map>")
     return lines
+
+
+def _road_names(events: list[RoadEvent], limit: int = 6) -> str:
+    """Distinct road names, interstates and US/NC routes first."""
+    rank = lambda road: (0 if road.startswith("I-") else 1 if road.startswith(("US ", "NC ")) else 2, road)
+    roads = sorted(dict.fromkeys(e.road for e in events), key=rank)
+    extra = f" and {len(roads) - limit} more" if len(roads) > limit else ""
+    return ", ".join(roads[:limit]) + extra
 
 
 _ALERTS_DOWN = "🔔 *Active alerts:* unavailable (NWS feed error)"
@@ -286,7 +296,7 @@ def guide(cfg: dict) -> str:
         "🔄 *Update* and ✅ *ended* notices reply in the same thread as the alert they belong to.",
     ]
     if cfg.get("ncdot", {}).get("enabled"):
-        lines.append(f"🚧 *Road closure* — NCDOT reports a full closure or major incident in {county}.")
+        lines.append(f"🚧 *Road closure* — NCDOT reports a road in {county} closed by weather or an incident.")
         lines.append("🧊 *Road conditions* — NCDOT's snow and ice report for the county has changed.")
     if cfg["parkway"].get("enabled"):
         lines.append("🚧 *Parkway* — a Blue Ridge Parkway section around Asheville has opened or closed.")

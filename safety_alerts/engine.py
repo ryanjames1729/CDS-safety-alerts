@@ -221,10 +221,14 @@ class Monitor:
             if not quiet and not self._post(messages.road_event(event), f"ncdot-{event_id}"):
                 continue
             known[event_id] = {"where": event.where, "summary": event.description[:200]}
+        listed = {e.id: e for e in events}
         for event_id in [i for i in known if i not in notable]:
-            gone = known[event_id]
+            gone, still = known[event_id], listed.get(event_id)
+            # Still closed but no longer something we post about (a settings
+            # change, say): forget it without announcing a reopening.
+            silent = quiet or (still is not None and still.is_closure)
             text = messages.road_event_cleared(gone["where"], gone["summary"])
-            if quiet or self._post(text, f"ncdot-{event_id}"):
+            if silent or self._post(text, f"ncdot-{event_id}"):
                 del known[event_id]
 
         if conditions != saved["conditions"]:
