@@ -22,9 +22,9 @@ user_agent = "school-safety-alerts/1.0"
 # Added to "act now" alerts so everyone in the space is notified.
 # Use "" to turn pings off.
 mention = "<users/all>"
-# Set to true once the /update and /help commands are set up (see chat-app/),
-# so the guide tells people about them.
-commands = false
+# The /update and /help commands are set up (see chat-app/), so the guide
+# tells people about them. Set to false if the Chat app is ever removed.
+commands = true
 
 [tiers]
 # ACT NOW: posted immediately with a ping.
