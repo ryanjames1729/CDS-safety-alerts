@@ -2,9 +2,12 @@ name: Safety alerts
 
 on:
   schedule:
-    # Every 5 minutes, offset from the top of the hour when GitHub is busiest
-    # and starts scheduled runs latest. Each run then keeps polling NWS once a
-    # minute for 4 minutes, so warnings are picked up quickly.
+    # Backup only. GitHub starts scheduled runs late and often skips them (in
+    # this repository's first day: twice in 21 hours), so the dependable
+    # 5-minute clock is the Apps Script project in chat-app/, which starts
+    # this workflow through workflow_dispatch below.
+    # Each run keeps polling NWS once a minute for 4 minutes, so with a run
+    # starting every 5 minutes warnings are picked up within about a minute.
     - cron: "2-59/5 * * * *"
   workflow_dispatch:
     inputs:

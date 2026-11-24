@@ -32,11 +32,15 @@ Sources: [NWS alerts and forecast API](https://www.weather.gov/documentation/ser
 5. **Make `main` the default branch** (*Settings* → *General* → *Default branch*). GitHub only runs scheduled workflows from the default branch.
 6. **Send a test.** *Actions* → *Safety alerts* → *Run workflow* → choose `test-message`. A test message should appear in the space. The next scheduled run posts a one-time "monitor is online" summary.
 
+## Start the clock
+
+Follow Part A of [`chat-app/README.md`](chat-app/README.md). It sets up a Google Apps Script timer that starts a monitoring run every 5 minutes. Do not skip this: GitHub's built-in scheduler is not dependable enough on its own.
+
 ## Asking for an update
 
 *Actions* → *On request* → *Run workflow* posts either a conditions update (`update`) or the guide to reading the alerts (`help`) within about half a minute.
 
-To let people type `/update` and `/help` in the Chat space instead, set up the small Google Chat app in [`chat-app/`](chat-app/README.md). It is needed because the webhook this monitor posts through is one-way: it cannot see what people type.
+To let people type `/update` and `/help` in the Chat space instead, follow Part B of [`chat-app/README.md`](chat-app/README.md). It is needed because the webhook this monitor posts through is one-way: it cannot see what people type.
 
 ## Changing what gets posted
 
@@ -44,13 +48,14 @@ Everything adjustable is in [`config.toml`](config.toml): which alert types are 
 
 ## Limits to know about
 
-- **This supplements, and does not replace, phone emergency alerts and a NOAA weather radio.** GitHub usually starts scheduled runs within a few minutes, but can be 10 to 20 minutes late at busy times, and can skip runs entirely. Once a run starts it checks NWS every minute for four minutes; NCDOT and the Parkway are checked once per run.
+- **This supplements, and does not replace, phone emergency alerts and a NOAA weather radio.** Alerts here can lag the official warning by several minutes, and the monitor depends on GitHub and Google both being up.
+- **The clock in [`chat-app/`](chat-app/README.md) is what makes it dependable.** GitHub's own scheduler started the 5-minute job only twice in the repository's first 21 hours. With the Apps Script clock, a run starts every 5 minutes and checks NWS every minute for four minutes; NCDOT and the Parkway are checked once per run. Without it, expect hours between checks.
 - **Silence is normal, so it does not prove the monitor is running.** On an ordinary day nothing is posted. To check, ask for a conditions update, or look at the *Actions* tab for recent *Safety alerts* runs. GitHub emails the repository owner when a run fails, and disables schedules in repositories with no activity for 60 days.
 - The repository is public, so run logs and `config.toml` are visible to anyone. The webhook URL is not; it lives only in the repository secret.
 
 ## How it works
 
-`.github/workflows/alerts.yml` runs `python3 -m safety_alerts` every five minutes. The program compares what the sources report with what it has already posted, which it remembers in `state.json` on the `alert-state` branch, and posts only what changed. It uses the Python standard library only.
+The Apps Script clock starts `.github/workflows/alerts.yml` every five minutes, which runs `python3 -m safety_alerts`. The program compares what the sources report with what it has already posted, which it remembers in `state.json` on the `alert-state` branch, and posts only what changed. It uses the Python standard library only.
 
 ```
 safety_alerts/
