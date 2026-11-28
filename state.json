@@ -1,0 +1,60 @@
+{
+ "briefs": {
+  "evening": "2026-11-26",
+  "morning": "2026-11-27"
+ },
+ "events": {},
+ "grid": {
+  "grid": "https://api.weather.gov/gridpoints/GSP/57,72",
+  "hourly": "https://api.weather.gov/gridpoints/GSP/57,72/forecast/hourly",
+  "where": "35.5238,-82.5299"
+ },
+ "health": {},
+ "ncdot": {
+  "conditions": {},
+  "events": {
+   "2034688": {
+    "summary": "Other Weather Incident on NC 9 Both Directions in Buncombe, Henderson County from Carol Ln to  US 74 ALT. All lanes closed. Id: 876",
+    "where": "NC 9 Both Directions"
+   }
+  }
+ },
+ "parkway": {
+  "as_of": "7:01 A.M, Saturday, November 28, 2026",
+  "sections": {
+   "375.7-375.7": {
+    "state": "open",
+    "status": "Open"
+   },
+   "375.7-381.9": {
+    "state": "open",
+    "status": "Open"
+   },
+   "377.4-377.4": {
+    "state": "open",
+    "status": "Open"
+   },
+   "381.9-382.8": {
+    "state": "open",
+    "status": "Ungated"
+   },
+   "382.8-384.1": {
+    "state": "open",
+    "status": "Open"
+   },
+   "384.1-384.7": {
+    "state": "open",
+    "status": "Ungated"
+   },
+   "384.7-388.8": {
+    "state": "open",
+    "status": "Open"
+   },
+   "388.8-393.6": {
+    "state": "open",
+    "status": "Open"
+   }
+  }
+ },
+ "started": true
+}
